@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<!-- XML file produced from file: user_guide.tex
+     using Hyperlatex v 2.7 (c) Otfried Cheong
+     on Emacs 22.2.1, Sat Apr 16 21:41:54 2011 -->
+<head>
+<title>Chord -- Setting up a Java Program for Analysis</title>
+
+<style type="text/css">
+.maketitle { align : center }
+div.abstract { margin-left: 20%; margin-right: 10%; }
+h3.abstract  { align : center }
+div.verse, div.quote, div.quotation {
+  margin-left : 10%; 
+  margin-right : 10%;
+}
+</style>
+
+
+</head>
+<body>
+<table width="100%" cellpadding=0 cellspacing=2><tr>
+    <td bgcolor="#99ccff"><a href="scope.html"><img border="0" alt="Analysis Scope Construction" src="next.png"></a></td><td bgcolor="#99ccff"><a href="enduser_guide.html"><img border="0" alt="Guide for End-Users" src="up.png"></a></td><td bgcolor="#99ccff"><a href="properties.html"><img border="0" alt="Chord Properties" src="previous.png"></a></td><td align="center" bgcolor="#99ccff" width="100%"><b>Setting up a Java Program for Analysis</b></td></tr></table>
+<h2>Setting up a Java Program for Analysis</h2>
+
+<p>This chapter describes how to setup a Java program for analysis using Chord.
+Suppose the program has the following directory structure:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+example/
+    src/
+        foo/
+            Main.java
+            ...
+    classes/
+        foo/
+            Main.class
+            ...
+    lib/
+        src/
+            taz/
+                ...
+        jar/
+            taz.jar
+    chord.properties
+</pre>
+</td></tr></tbody></table>
+
+<p>The above structure is typical: the program's Java source
+files are under <tt>src/</tt>, its class files are under <tt>classes/</tt>,
+and the source and jar files of the libraries used by the program are
+under <tt>lib/src/</tt> and <tt>lib/jar/</tt>, respectively.  The
+purpose of the <tt>chord.properties</tt> file is explained below.
+<p>The only way to specify inputs to Chord, including the program
+to be analyzed, is via system properties.
+Section <a href="properties.html#id1">*</a> describes various ways by which
+properties can be passed to Chord.  Here, we describe the
+simplest approach, in which all properties of the program to be analyzed
+that might be needed by Chord are defined in a file named <tt>chord.properties</tt> 
+that is located in the top-level directory of the program (directory <tt>example/</tt> above).
+Then, Chord can be applied to the program by running the following command:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+ant -Dchord.work.dir=&lt;WORK_DIR&gt; run
+</pre>
+</td></tr></tbody></table>
+
+<p>This command instructs Chord to run in the directory denoted by <tt>&lt;WORK_DIR&gt;</tt>, where it searches for a file
+named <tt>chord.properties</tt> and
+loads all properties defined in that file, if it exists.
+Thus, for the above program, <tt>&lt;WORK_DIR&gt;</tt> must be the absolute or relative path of the
+<tt>example/</tt> directory.  A sample <tt>chord.properties</tt> file for the above program is as follows:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+chord.main.class=foo.Main
+chord.class.path=classes:lib/jar/taz.jar
+chord.src.path=src:lib/src
+chord.run.ids=0,1
+chord.args.0="-thread 1 -n 10"
+chord.args.1="-thread 2 -n 50"
+</pre>
+</td></tr></tbody></table>
+
+<p>Each relative file/directory name in the value of any property
+defined in this file (e.g., the <tt>lib/src</tt> directory name in the value of
+property <tt>chord.src.path</tt> above) is treated relative to the directory
+specified by property <tt>chord.work.dir</tt>, whose default value
+is the current directory.
+Section <a href="properties.html#id3">*</a> presents all program properties that are
+recognized by Chord.  Here, we only describe those that are most commonly
+used, namely, those defined in the above sample properties file:
+<ul><li><tt>chord.main.class</tt> specifies the fully-qualified name of the main
+class of the program.
+<li><tt>chord.class.path</tt> specifies the application classpath
+of the program (the JDK standard library classpath is implicitly
+included).
+<li><tt>chord.src.path</tt> specifies the Java source path of the program.
+All analyses in Chord operate on Java bytecode.  The only use
+of this property is to HTMLize the Java source files of the program so
+that the results of analyses can be reported at the Java
+source code level.
+<li><tt>chord.run.ids</tt> specifies a list of IDs to identify runs of the
+program.  It is used by dynamic analyses to determine how many
+times the program must be run.  An additional use of this property is
+to allow specifying the command-line arguments to use in the run
+having ID <tt>&lt;id&gt;</tt> via property <tt>chord.args.&lt;id&gt;</tt>, as
+illustrated by properties <tt>chord.args.0</tt> and <tt>chord.args.1</tt>
+above.
+</ul>
+<p>The above command does not do much beyond making Chord load the above
+properties file.  For Chord to do something interesting,
+additional properties must be set that specify the function(s)
+Chord must perform.  All functions are summarized in Section <a href="properties.html#id5">*</a>.
+The most common function is to run one or more analyses on the input program;
+it is described in Chapter <a href="running.html">*</a>.
+
+<hr /><address>mhn@cs.stanford.edu</address><br />
+<table width="100%" cellpadding=0 cellspacing=2><tr>
+    <td bgcolor="#99ccff"><a href="scope.html"><img border="0" alt="Analysis Scope Construction" src="next.png"></a></td><td bgcolor="#99ccff"><a href="enduser_guide.html"><img border="0" alt="Guide for End-Users" src="up.png"></a></td><td bgcolor="#99ccff"><a href="properties.html"><img border="0" alt="Chord Properties" src="previous.png"></a></td><td align="center" bgcolor="#99ccff" width="100%"><b>Setting up a Java Program for Analysis</b></td></tr></table></body></html>

@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<!-- XML file produced from file: user_guide.tex
+     using Hyperlatex v 2.7 (c) Otfried Cheong
+     on Emacs 22.2.1, Sat Apr 16 21:41:55 2011 -->
+<head>
+<title>Chord -- Dynamic Analysis</title>
+
+<style type="text/css">
+.maketitle { align : center }
+div.abstract { margin-left: 20%; margin-right: 10%; }
+h3.abstract  { align : center }
+div.verse, div.quote, div.quotation {
+  margin-left : 10%; 
+  margin-right : 10%;
+}
+</style>
+
+
+</head>
+<body>
+<table width="100%" cellpadding=0 cellspacing=2><tr>
+    <td bgcolor="#99ccff"><a href="datalog.html"><img border="0" alt="Datalog Analysis" src="next.png"></a></td><td bgcolor="#99ccff"><a href="developer_guide.html"><img border="0" alt="Guide for Developers" src="up.png"></a></td><td bgcolor="#99ccff"><a href="running.html"><img border="0" alt="Running an Analysis" src="previous.png"></a></td><td align="center" bgcolor="#99ccff" width="100%"><b>Dynamic Analysis</b></td></tr></table>
+<h2>Dynamic Analysis</h2>
+
+<p>This chapter describes all aspect of dynamic analysis in Chord.  Section
+<a href="#id1">*</a> describes how to write a dynamic analysis, Section
+<a href="#id2">*</a> describes how to compile and run it, and Section
+<a href="#id3">*</a> describes common dynamic analysis events supported in
+Chord.
+
+<h3><a name="id1">Writing a Dynamic Analysis</a></h3>
+
+<p>Follow the following steps to write your own dynamic analysis.
+<p>Create a class extending <tt>chord.project.analyses.DynamicAnalysis</tt> and override
+the appropriate methods in it.
+The only methods that must be compulsorily overridden are method <tt>getInstrScheme()</tt>,
+which must return an instance of the "instrumentation scheme" required by
+your dynamic analysis (i.e., the kind and format of events to be generated during an
+instrumented program's execution)
+plus each <tt>process&lt;event&gt;(&lt;args&gt;)</tt> method that corresponds to event <tt>&lt;event&gt;</tt>
+with format <tt>&lt;args&gt;</tt> enabled by the chosen instrumentation scheme.
+See Section <a href="#id3">*</a> for the kinds of supported events and their formats.
+<p>A sample such class <tt>MyDynamicAnalysis</tt> is shown below:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<font size="-1"><pre>
+    import chord.project.Chord;
+    import chord.project.analyses.DynamicAnalysis;
+    import chord.instr.InstrScheme;
+
+    // ***TODO***: analysis won't be recognized by Chord without this annotation
+    @Chord(name = "&lt;ANALYSIS_NAME&gt;")    
+    public class MyDynamicAnalysis extends DynamicAnalysis {
+        InstrScheme scheme;
+        @Override
+        public InstrScheme getInstrScheme() {
+            if (scheme != null)
+                return scheme;
+            scheme = new InstrScheme();
+            // ***TODO***: Choose (&lt;event1&gt;, &lt;args1&gt;), ... (&lt;eventN&gt;, &lt;argsN&gt;)
+            // depending upon the kind and format of events required by this
+            // dynamic analysis to be generated for this during an instrumented
+            // program's execution.
+            scheme.set&lt;event1&gt;(&lt;args1&gt;);
+            ...
+            scheme.set&lt;eventN&gt;(&lt;argsN&gt;);
+            return scheme;
+        }
+        @Override
+        public void initAllPasses() {
+            // ***TODO***: User code to be executed once and for all
+            // before all instrumented program runs start.
+        }
+        @Override
+        public void doneAllPasses() {
+            // ***TODO***: User code to be executed once and for all
+            // after all instrumented program runs finish.
+        }
+        @Override
+        public void initPass() {
+            // ***TODO***: User code to be executed once before each instrumented program run starts.
+        }
+        @Override
+        public void donePass() {
+            // ***TODO***: User code to be executed once after each instrumented program run finishes.
+        }
+        @Override
+        public void process&lt;event1&gt;(&lt;args1&gt;) {
+            // ***TODO***: User code for handling events of kind &lt;event1&gt; with format &lt;args1&gt;.
+        }
+        ...
+        @Override
+        public void process&lt;eventN&gt;(&lt;argsN&gt;) {
+            // ***TODO***: User code for handling events of kind &lt;eventN&gt; with format &lt;argsN&gt;.
+        }
+    }
+</pre>
+</font>
+</td></tr></tbody></table>
+
+
+<h3><a name="id2">Compiling and Running a Dynamic Analysis</a></h3>
+
+<p>Compile the analysis by placing the directory containing class <tt>MyDynamicAnalysis</tt> created
+above in the path defined by property <tt>chord.ext.java.analysis.path</tt>.
+<p>Provide the IDs of program runs to be generated (say 1, 2, ..., M) and the command-line arguments to be
+used for the program in each of those runs (say <tt>&lt;args1&gt;</tt>, ..., <tt>&lt;argsM&gt;</tt>) via properties
+<tt>chord.run.ids=1,2,...,N</tt> and <tt>chord.args.1=&lt;args1&gt;</tt>, ..., <tt>chord.args.M=&lt;argsM&gt;</tt>.
+By default, <tt>chord.run.ids=0</tt> and <tt>chord.args.0=""</tt>, that is, the program will be run only
+once (using run ID 0) with no command-line arguments.
+<p>To run the analysis, set property <tt>chord.run.analyses</tt> to
+<tt>&lt;ANALYSIS_NAME&gt;</tt> (recall that <tt>&lt;ANALYSIS_NAME&gt;</tt> is the name provided
+in the <tt>@Chord</tt> annotation for class <tt>MyDynamicAnalysis</tt> created
+above).
+<p><b>Note:</b> The IBM J9 JVM on Linux is highly recommended if you intend to use Chord for
+dynamic program analysis, as it allows you to instrument the entire JDK; using any other
+platform will likely require excluding large parts of the JDK from being instrumented.
+Additionally, if you intend to use online (load-time) bytecode instrumentation in
+your dynamic program analysis, then you will need JDK 6 or higher, since this functionality
+requires the <tt>java.lang.instrument</tt> API with class retransformation support (the latter
+support is available only in JDK 6 and higher).
+<p>You can change the default values of various properties for configuring your dynamic analysis;
+see Section <a href="properties.html#id4">*</a> and Section <a href="properties.html#id7">*</a> in Chapter <a href="properties.html">*</a>.
+For instance:
+<ul><li>You can set property <tt>chord.scope.kind</tt> to <tt>dynamic</tt> so that the program scope
+is computed dynamically (i.e., by running the program) instead of statically.
+<li>You can exclude certain classes (e.g., JDK classes) from being instrumented by setting
+properties <tt>chord.std.scope.exclude</tt>, <tt>chord.ext.scope.exclude</tt>, and
+<tt>chord.scope.exclude</tt>.
+<li>You can choose between online (i.e. load-time) and offline bytecode instrumentation by
+setting property <tt>chord.instr.kind</tt> to <tt>online</tt> or <tt>offline</tt>.
+<li>You can require the event-generating and event-handling JVMs to be one and the same (by setting
+property <tt>chord.trace.kind</tt> to <tt>none</tt>),
+or to be separate (by setting property <tt>chord.trace.kind</tt> to <tt>full</tt> or <tt>pipe</tt>, depending upon
+whether you want the two JVMs to exchange events by a regular file or a POSIX pipe, respectively).
+Using a single JVM can cause correctness/performance issues if event-handling Java code itself is instrumented
+(e.g., say the event-handling code uses class <tt>java.util.ArrayList</tt> which is not excluded from program scope).
+Using separate JVMs prevents such issues since the event-handling JVM runs uninstrumented bytecode (only
+the event-generating JVM runs instrumented bytecode).
+If a regular file is used to exchange events between the two JVMs, then the JVMs run serially:
+the event-generating JVM first runs to completion, dumps the entire dynamic trace to the regular file,
+and then the event-handling JVM processes the dynamic trace.
+If a POSIX pipe is used to exchange events between the two JVMs, then the JVMs run in lockstep.
+Obviously, a pipe is more efficient for very long traces, but it 
+not portable (e.g., it does not currently work on Windows/Cygwin), and the traces cannot be reused
+across Chord runs (see the following item).
+<li>You can reuse dynamic traces from a previous Chord run by setting property
+<tt>chord.reuse.traces</tt> to <tt>true</tt>.  In this case, you must also set property
+<tt>chord.trace.kind</tt> to <tt>full</tt>.
+<li>You can set property <tt>chord.dynamic.haltonerr</tt> to <tt>false</tt> to prevent Chord from terminating
+even if the program on which dynamic analysis is being performed crashes.
+</ul>
+<p>Chord offers much more flexibility in crafting dynamic analyses.
+You can define your own instrumentor (by subclassing <tt>chord.instr.CoreInstrumentor</tt>
+instead of using the default <tt>chord.instr.Instrumentor</tt>) and your own event handler (by subclassing <tt>chord.runtime.CoreEventHandler</tt>
+instead of using the default <tt>chord.runtime.EventHandler</tt>).
+You can ask the dynamic analysis to use your custom instrumentor and/or your custom event handler by overriding
+methods <tt>getInstrumentor()</tt> and <tt>getEventHandler()</tt>, respectively, defined in <tt>chord.project.analyses.CoreDynamicAnalysis</tt>.
+Finally, you can define your own dynamic analysis template by subclassing <tt>chord.project.analyses.CoreDynamicAnalysis</tt>
+instead of subclassing the default <tt>chord.project.analyses.DynamicAnalysis</tt>.
+
+<h3><a name="id3">Common Dynamic Analysis Events</a></h3>
+
+<p>Chord provides support for instrumenting common dynamic analysis events.
+The below table describes these events.
+<table border=1 cellpadding=10><tbody><tr><td colspan="1" align="LEFT">
+ 
+<b>Event Kind</b> </td><td colspan="1" align="LEFT"> <b>Description</b> </td></tr>
+<tr><td colspan="1" align="LEFT">
+EnterMainMethod(<b>t</b>) </td><td colspan="1" align="LEFT"> After thread <b>t</b>&#32;enters method <b>m</b>&#32;(in domain M).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+EnterMethod(<b>m</b>, <b>t</b>) </td><td colspan="1" align="LEFT"> After thread <b>t</b>&#32;enters method <b>m</b>&#32;(in domain M).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+LeaveMethod(<b>m</b>, <b>t</b>) </td><td colspan="1" align="LEFT"> Before thread <b>t</b>&#32;leaves method <b>m</b>&#32;(in domain M).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+EnterLoop(<b>w</b>, <b>t</b>) </td><td colspan="1" align="LEFT"> Before thread <b>t</b>&#32;begins loop <b>w</b>&#32;(in domain W).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+LoopIteration(<b>w</b>, <b>t</b>) </td><td colspan="1" align="LEFT"> Before thread <b>t</b>&#32;starts a new iteration of loop <b>w</b>&#32;(in domain W).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+LeaveLoop(<b>w</b>, <b>t</b>) </td><td colspan="1" align="LEFT"> After thread <b>t</b>&#32;finishes loop <b>w</b>&#32;(in domain W).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+BasicBlock(<b>b</b>, <b>t</b>) </td><td colspan="1" align="LEFT"> Before thread <b>t</b>&#32;enters basic block <b>b</b>&#32;(in domain B).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+Quad(<b>p</b>, <b>t</b>) </td><td colspan="1" align="LEFT"> Before thread <b>t</b>&#32;executes quad at program point <b>p</b>&#32;(in domain P).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+BefMethodCall(<b>i</b>, <b>t</b>, <b>o</b>) </td><td colspan="1" align="LEFT"> 
+<table><tbody><tr><td colspan="1" align="LEFT">
+
+Before thread <b>t</b>&#32;executes the method invocation statement at program point <b>i</b>&#32;(in domain I) with this argument as object <b>o</b>. </td></tr>
+<tr><td colspan="1" align="LEFT">
+<b>Note:</b> Not generated before constructor calls; use BefNew event.
+</td></tr></tbody></table>
+
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+AftMethodCall(<b>i</b>, <b>t</b>, <b>o</b>) </td><td colspan="1" align="LEFT">
+<table><tbody><tr><td colspan="1" align="LEFT">
+
+After thread <b>t</b>&#32;executes the method invocation statement at program point <b>i</b>&#32;(in domain I) with this argument as object <b>o</b>. </td></tr>
+<tr><td colspan="1" align="LEFT">
+<b>Note:</b> Not generated after constructor calls; use AftNew event.
+</td></tr></tbody></table>
+
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+BefNew(<b>h</b>, <b>t</b>, <b>o</b>) </td><td colspan="1" align="LEFT"> Before thread <b>t</b>&#32;executes a <tt>new</tt> bytecode instruction and allocates fresh object <b>o</b>&#32;at program point <b>h</b>&#32;(in domain H).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+AftNew(<b>h</b>, <b>t</b>, <b>o</b>) </td><td colspan="1" align="LEFT"> After thread <b>t</b>&#32;executes a <tt>new</tt> bytecode instruction and allocates fresh object <b>o</b>&#32;at program point <b>h</b>&#32;(in domain H).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+NewArray(<b>h</b>, <b>t</b>, <b>o</b>) </td><td colspan="1" align="LEFT"> After thread <b>t</b>&#32;executes a <tt>newarray</tt> bytecode instruction and allocates fresh object <b>o</b>&#32;at program point <b>h</b>&#32;(in domain H).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+GetstaticPrimitive(<b>e</b>, <b>t</b>, <b>f</b>) </td><td colspan="1" align="LEFT"> After thread <b>t</b>&#32;reads primitive-typed static field <b>f</b>&#32;(in domain F) at program point <b>e</b>&#32;(in domain E).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+GetstaticReference(<b>e</b>, <b>t</b>, <b>f</b>, <b>o</b>) </td><td colspan="1" align="LEFT"> After thread <b>t</b>&#32;reads object <b>o</b>&#32;from reference-typed static field <b>f</b>&#32;(in domain F) at program point <b>e</b>&#32;(in domain E).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+PutstaticPrimitive(<b>e</b>, <b>t</b>, <b>f</b>) </td><td colspan="1" align="LEFT"> After thread <b>t</b>&#32;writes primitive-typed static field <b>f</b>&#32;(in domain F) at program point <b>e</b>&#32;(in domain E).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+PutstaticReference(<b>e</b>, <b>t</b>, <b>f</b>, <b>o</b>) </td><td colspan="1" align="LEFT"> After thread <b>t</b>&#32;writes object <b>o</b>&#32;to reference-typed static field <b>f</b>&#32;(in domain F) at program point <b>e</b>&#32;(in domain E).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+GetfieldPrimitive(<b>e</b>, <b>t</b>, <b>b</b>, <b>f</b>) </td><td colspan="1" align="LEFT"> After thread <b>t</b>&#32;reads primitive-typed instance field <b>f</b>&#32;(in domain F) of object <b>b</b>&#32;at program point <b>e</b>&#32;(in domain E).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+GetfieldReference(<b>e</b>, <b>t</b>, <b>b</b>, <b>f</b>, <b>o</b>) </td><td colspan="1" align="LEFT"> After thread <b>t</b>&#32;reads object <b>o</b>&#32;from reference-typed instance field <b>f</b>&#32;(in domain F) of object <b>b</b>&#32;at program point <b>e</b>&#32;(in domain E).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+PutfieldPrimitive(<b>e</b>, <b>t</b>, <b>b</b>, <b>f</b>) </td><td colspan="1" align="LEFT"> After thread <b>t</b>&#32;writes primitive-typed instance field <b>f</b>&#32;(in domain F) of object <b>b</b>&#32;at program point <b>e</b>&#32;(in domain E).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+PutfieldReference(<b>e</b>, <b>t</b>, <b>b</b>, <b>f</b>, <b>o</b>) </td><td colspan="1" align="LEFT"> After thread <b>t</b>&#32;writes object <b>o</b>&#32;to reference-typed instance field <b>f</b>&#32;(in domain F) of object <b>b</b>&#32;at program point <b>e</b>&#32;(in domain E).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+AloadPrimitive(<b>e</b>, <b>t</b>, <b>b</b>, <b>i</b>) </td><td colspan="1" align="LEFT"> After thread <b>t</b>&#32;reads the primitive-typed element at index <b>i</b>&#32;of array object <b>b</b>&#32;at program point <b>e</b>&#32;(in domain E).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+AloadReference(<b>e</b>, <b>t</b>, <b>b</b>, <b>i</b>, <b>o</b>) </td><td colspan="1" align="LEFT"> After thread <b>t</b>&#32;reads object <b>o</b>&#32;from the reference-typed element at index <b>i</b>&#32;of array object <b>b</b>&#32;at program point <b>e</b>&#32;(in domain E).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+AstorePrimitive(<b>e</b>, <b>t</b>, <b>b</b>, <b>i</b>) </td><td colspan="1" align="LEFT"> After thread <b>t</b>&#32;writes the primitive-typed element at index <b>i</b>&#32;of array object <b>b</b>&#32;at program point <b>e</b>&#32;(in domain E).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+AstoreReference(<b>e</b>, <b>t</b>, <b>b</b>, <b>i</b>, <b>o</b>) </td><td colspan="1" align="LEFT"> After thread <b>t</b>&#32;writes object <b>o</b>&#32;to the reference-typed element at index <b>i</b>&#32;of array object <b>b</b>&#32;at program point <b>e</b>&#32;(in domain E).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+ThreadStart(<b>i</b>, <b>t</b>, <b>o</b>) </td><td colspan="1" align="LEFT"> Before thread <b>t</b>&#32;calls the <tt>start()</tt> method of <tt>java.lang.Thread</tt> at program point <b>i</b>&#32;(in domain I) and spawns a thread <b>o</b>.
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+ThreadJoin(<b>i</b>, <b>t</b>, <b>o</b>) </td><td colspan="1" align="LEFT"> Before thread <b>t</b>&#32;calls the <tt>join()</tt> method of <tt>java.lang.Thread</tt> at program point <b>i</b>&#32;(in domain I) to join with thread <b>o</b>.
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+AcquireLock(<b>l</b>, <b>t</b>, <b>o</b>) </td><td colspan="1" align="LEFT"> After thread <b>t</b>&#32;executes a statement of the form "monitorenter <b>o</b>" or enters a method synchronized on <b>o</b>&#32;at program point <b>l</b>&#32;(in domain L).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+ReleaseLock(<b>r</b>, <b>t</b>, <b>o</b>) </td><td colspan="1" align="LEFT"> Before thread <b>t</b>&#32;executes a statement of the form "monitorexit <b>o</b>" or leaves a method synchronized on <b>o</b>&#32;at program point <b>r</b>&#32;(in domain R).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+Wait(<b>i</b>, <b>t</b>, <b>o</b>) </td><td colspan="1" align="LEFT"> Before thread <b>t</b>&#32;calls the <tt>wait()</tt> method of <tt>java.lang.Object</tt> on object <b>o</b>&#32;at program point <b>i</b>&#32;(in domain I).
+</td></tr>
+<tr><td colspan="1" align="LEFT">
+Notify(<b>i</b>, <b>t</b>, <b>o</b>) </td><td colspan="1" align="LEFT"> Before thread <b>t</b>&#32;calls the <tt>notify()</tt> or <tt>notifyAll()</tt> method of <tt>java.lang.Object</tt> on object <b>o</b>&#32;at program point <b>i</b>&#32;(in domain I).
+</td></tr></tbody></table>
+
+
+<hr /><address>mhn@cs.stanford.edu</address><br />
+<table width="100%" cellpadding=0 cellspacing=2><tr>
+    <td bgcolor="#99ccff"><a href="datalog.html"><img border="0" alt="Datalog Analysis" src="next.png"></a></td><td bgcolor="#99ccff"><a href="developer_guide.html"><img border="0" alt="Guide for Developers" src="up.png"></a></td><td bgcolor="#99ccff"><a href="running.html"><img border="0" alt="Running an Analysis" src="previous.png"></a></td><td align="center" bgcolor="#99ccff" width="100%"><b>Dynamic Analysis</b></td></tr></table></body></html>

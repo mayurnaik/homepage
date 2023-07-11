@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<!-- XML file produced from file: user_guide.tex
+     using Hyperlatex v 2.7 (c) Otfried Cheong
+     on Emacs 22.2.1, Sat Apr 16 21:41:55 2011 -->
+<head>
+<title>Chord -- Running an Analysis</title>
+
+<style type="text/css">
+.maketitle { align : center }
+div.abstract { margin-left: 20%; margin-right: 10%; }
+h3.abstract  { align : center }
+div.verse, div.quote, div.quotation {
+  margin-left : 10%; 
+  margin-right : 10%;
+}
+</style>
+
+
+</head>
+<body>
+<table width="100%" cellpadding=0 cellspacing=2><tr>
+    <td bgcolor="#99ccff"><a href="dynamic.html"><img border="0" alt="Dynamic Analysis" src="next.png"></a></td><td bgcolor="#99ccff"><a href="developer_guide.html"><img border="0" alt="Guide for Developers" src="up.png"></a></td><td bgcolor="#99ccff"><a href="writing.html"><img border="0" alt="Writing an Analysis" src="previous.png"></a></td><td align="center" bgcolor="#99ccff" width="100%"><b>Running an Analysis</b></td></tr></table>
+<h2>Running an Analysis</h2>
+
+<p>This chapter describes how to run an analysis in Chord.  Broadly, there are two
+kinds of analyses in Chord: those written imperatively in Java and those written
+declaratively in Datalog. They are summarized in the following table:
+<table border=1 cellpadding=10><tbody><tr><td colspan="1" align="LEFT">
+
+Kind:
+	</td><td colspan="1" align="CENTER"> imperative (see Chapter <a href="writing.html">*</a>)
+	</td><td colspan="1" align="CENTER"> declarative (see Chapter <a href="datalog.html">*</a>) </td></tr>
+<tr><td colspan="1" align="LEFT">
+Location:
+	</td><td colspan="1" align="CENTER"> <table><tbody><tr><td colspan="1" align="CENTER">
+
+	  a <tt>.class</tt> file in the path denoted by property </td></tr>
+<tr><td colspan="1" align="CENTER">
+<tt>chord.java.analysis.path</tt> compiled </td></tr>
+<tr><td colspan="1" align="CENTER">
+from a <tt>@Chord</tt>-annotated class implementing </td></tr>
+<tr><td colspan="1" align="CENTER">
+interface <a href="http://chord.stanford.edu/javadoc/chord/project/ITask.html"><tt>chord.project.ITask</tt></a>
+      </td></tr></tbody></table>
+
+	</td><td colspan="1" align="CENTER"> <table><tbody><tr><td colspan="1" align="CENTER">
+
+      a <tt>.dlog</tt> file in the path denoted by property </td></tr>
+<tr><td colspan="1" align="CENTER">
+<tt>chord.dlog.analysis.path</tt>
+      </td></tr></tbody></table>
+ </td></tr>
+<tr><td colspan="1" align="LEFT">
+Name:
+	</td><td colspan="1" align="CENTER"> via stmt <code>name="&lt;NAME&gt;"</code> in <tt>@Chord</tt> annotation
+	</td><td colspan="1" align="CENTER"> via line "<code># name=&lt;NAME&gt;</code>" in <tt>.dlog</tt> file </td></tr></tbody></table>
+
+<p>In its most general form, the command for running an analysis is as follows:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+ant -Dchord.work.dir=&lt;WORK_DIR&gt; -Dchord.run.analyses=&lt;ANALYSIS_NAME&gt; \
+    -Dchord.dlog.analysis.path=&lt;DLOG_ANALYSIS_PATH&gt; \
+    -Dchord.java.analysis.path=&lt;JAVA_ANALYSIS_PATH&gt; run
+</pre>
+</td></tr></tbody></table>
+
+<p>where:
+<ul><li><tt>&lt;WORK_DIR&gt;</tt> is a directory containing a file named
+<tt>chord.properties</tt> that defines various properties of the Java program to be
+analyzed that might be needed by the analysis being run, such as the program's
+main class, the program's application classpath, etc.
+(see Chapter <a href="setup.html">*</a>).
+<li><tt>&lt;ANALYSIS_NAME&gt;</tt> is the name of the analysis to run.  More generally, it
+can be a comma-separated list of names of analyses to run in order.
+<li><tt>&lt;JAVA_ANALYSIS_PATH&gt;</tt> is a path specifying all imperative analyses written
+in Java that might be needed to run the desired analysis.
+<li><tt>&lt;DLOG_ANALYSIS_PATH&gt;</tt> is a path specifying all declarative analyses
+written in Datalog that might be needed to run the desired analysis.
+</ul>
+<p>Each analysis in Chord is written modularly, independent of other analyses,
+along with lightweight annotations specifying the inputs and outputs of the
+analysis.  Chord's runtime automatically computes dependencies between analyses
+(e.g., determines which analysis produces as output a result that is needed as
+input by another analysis).  Before running the desired analysis named
+<tt>&lt;ANALYSIS_NAME&gt;</tt>, Chord recursively runs other analyses until the inputs
+to the desired analysis have been computed; it finally runs the desired analysis
+to produce the outputs of that analysis.  Chapter <a href="project.html">*</a> explains
+this process in detail.  Each of these analyses must occur in the path denoted
+by <tt>&lt;JAVA_ANALYSIS_PATH&gt;</tt> or <tt>&lt;DLOG_ANALYSIS_PATH&gt;</tt>, depending upon
+whether the analysis is written imperatively in Java or declaratively in
+Datalog, respectively.
+<p>Chord provides shorthand ways for specifying analysis paths by means of the
+following six properties:
+<table border=1 cellpadding=10><tbody><tr><td colspan="1" align="CENTER">
+
+Analysis Kind
+	</td><td colspan="1" align="CENTER"> Predefined
+	</td><td colspan="1" align="CENTER"> User-defined
+	</td><td colspan="1" align="CENTER"> All </td></tr>
+<tr><td colspan="1" align="CENTER">
+imperative
+	</td><td colspan="1" align="LEFT"> <tt>chord.std.java.analysis.path</tt>
+	</td><td colspan="1" align="LEFT"> <tt>chord.ext.java.analysis.path</tt>
+	</td><td colspan="1" align="LEFT"> <tt>chord.java.analysis.path</tt> </td></tr>
+<tr><td colspan="1" align="CENTER">
+declarative
+	</td><td colspan="1" align="LEFT"> <tt>chord.std.dlog.analysis.path</tt>
+	</td><td colspan="1" align="LEFT"> <tt>chord.ext.dlog.analysis.path</tt>
+	</td><td colspan="1" align="LEFT"> <tt>chord.dlog.analysis.path</tt>
+</td></tr></tbody></table>
+
+<p>The paths specified by the <tt>chord.std.*.analysis.path</tt> properties
+conventionally include all "standard" analyses: analyses that are predefined
+in Chord.  The default value of each of these properties is the absolute path
+of file <tt>chord.jar</tt>.  Normally, users must not change the value of these
+properties.
+<p>The paths specified by the <tt>chord.ext.*.analysis.path</tt> properties
+conventionally include all "external" analyses: analyses that are written by
+users.  The default value of each of these properties is the empty path.
+<p>The paths specified by the <tt>chord.*.analysis.path</tt> properties include
+<i>all</i> analyses: both standard and external ones.  The default value of each
+of these properties is simply the concatenation of the values of the
+corresponding two properties above that specify the paths of standard and
+external analyses.  Normally, users must not change the value of these
+properties.
+<p>Running the above command can cause Chord to report a runtime error in the
+following scenarios:
+<ul><li>Either no included analysis or multiple included analyses are named
+<tt>&lt;ANALYSIS_NAME&gt;</tt>.
+<li>A result declared as consumed by the analysis named <tt>&lt;ANALYSIS_NAME&gt;</tt>
+(or by some analysis on which the specified analysis is dependent directly or
+transitively) is either not declared as produced by any included analysis or
+is declared as produced by multiple included analyses.
+</ul>
+<p>To fix the error resulting from the "missing analysis" case in both the above
+scenarios, simply include the missing analysis in the path specified by
+properties <tt>chord.*.analysis.path</tt>.
+<p>To fix the error resulting from the "ambiguous analysis" case in both the
+above scenarios, the names <tt>A1</tt>, ..., <tt>An</tt> of all analyses that were
+involved in the ambiguity are provided in the error report.  Suppose <tt>Ai</tt>
+is the desired analysis from this set.  Then, one way to fix the error is to
+exclude all analyses in that set except analysis <tt>Ai</tt> from the path
+specified by properties <tt>chord.*.analysis.path</tt>.  A better way is to
+specify the names of <i>multiple</i> analyses in the value of property
+<tt>chord.run.analyses</tt> (recall that this property allows a comma-separated
+list of names of analyses to be run in order).  Specifically, the value of
+this property must specify the name of the desired analysis <tt>Ai</tt>
+<i>before</i> the name of the analysis that caused the ambiguity error.
+<p>The above command is for users who have defined their own analyses and wish
+to run them.  The following simpler command that uses the default values for
+properties <tt>chord.*.analysis.path</tt> suffices for users who only wish to run
+analyses predefined in Chord:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+ant -Dchord.work.dir=&lt;WORK_DIR&gt; -Dchord.run.analyses=&lt;ANALYSIS_NAME&gt; run
+</pre>
+</td></tr></tbody></table>
+
+<p>Section <a href="predefined.html#id1">*</a> illustrates this command using an example
+predefined analysis in Chord.
+
+<hr /><address>mhn@cs.stanford.edu</address><br />
+<table width="100%" cellpadding=0 cellspacing=2><tr>
+    <td bgcolor="#99ccff"><a href="dynamic.html"><img border="0" alt="Dynamic Analysis" src="next.png"></a></td><td bgcolor="#99ccff"><a href="developer_guide.html"><img border="0" alt="Guide for Developers" src="up.png"></a></td><td bgcolor="#99ccff"><a href="writing.html"><img border="0" alt="Writing an Analysis" src="previous.png"></a></td><td align="center" bgcolor="#99ccff" width="100%"><b>Running an Analysis</b></td></tr></table></body></html>

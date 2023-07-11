@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<!-- XML file produced from file: user_guide.tex
+     using Hyperlatex v 2.7 (c) Otfried Cheong
+     on Emacs 22.2.1, Sat Apr 16 21:41:55 2011 -->
+<head>
+<title>Chord -- Writing an Analysis</title>
+
+<style type="text/css">
+.maketitle { align : center }
+div.abstract { margin-left: 20%; margin-right: 10%; }
+h3.abstract  { align : center }
+div.verse, div.quote, div.quotation {
+  margin-left : 10%; 
+  margin-right : 10%;
+}
+</style>
+
+
+</head>
+<body>
+<table width="100%" cellpadding=0 cellspacing=2><tr>
+    <td bgcolor="#99ccff"><a href="running.html"><img border="0" alt="Running an Analysis" src="next.png"></a></td><td bgcolor="#99ccff"><a href="developer_guide.html"><img border="0" alt="Guide for Developers" src="up.png"></a></td><td bgcolor="#99ccff"><a href="project.html"><img border="0" alt="A Chord Project: Tasks, Targets, and Dependencies" src="previous.png"></a></td><td align="center" bgcolor="#99ccff" width="100%"><b>Writing an Analysis</b></td></tr></table>
+<h2>Writing an Analysis</h2>
+
+<p>Chord provides several <i>analysis templates</i>: classes containing boilerplate
+code that can be extended by users to rapidly prototype different kinds of
+analyses.  These classes are organized in the following hierarchy in package
+<a href="http://chord.stanford.edu/javadoc/chord/project/analyses/package-summary.html"><tt>chord.project.analyses</tt></a>:
+<pre>
+JavaAnalysis
+    |
+    |--- ProgramDom
+    |
+    |--- ProgramRel
+    |
+    |--- DlogAnalysis
+    |
+    |--- RHSAnalysis
+    |        |
+    |        |--- ForwardRHSAnalysis
+    |        |
+    |        |--- BackwardRHSAnalysis
+    |
+    |--- BasicDynamicAnalysis
+             |
+             |--- DynamicAnalysis
+</pre>
+<p>The following sections describe each of these analysis templates in more detail.
+
+<h3><a name="sec:java">JavaAnalysis</a></h3>
+
+<p>Class <a href="http://chord.stanford.edu/javadoc/chord/project/analyses/JavaAnalysis.html"><tt>chord.project.analyses.JavaAnalysis</tt></a>
+is the most general template for writing an analysis.  An analysis can be
+created using this template by extending this class as follows:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+import chord.project.Chord;
+import chord.project.ClassicProject;
+import chord.project.analyses.JavaAnalysis;
+import chord.program.Program;
+
+@Chord(
+    name = "&lt;ANALYSIS_NAME&gt;",
+    consumes = { "C1", ..., "Cn" },
+    produces = { "P1", ..., "Pm" },
+    namesOfTypes = { "C1", ..., "Cn", "P1", ..., "Pm" },
+    types = { A1.class, ..., An.class, B1.class, ..., Bm.class }
+)
+public class ExampleAnalysis extends JavaAnalysis {
+    @Override public void run() {
+        Program program = Program.g();
+        ClassicProject project = ClassicProject.g();
+        A1 c1 = (A1) project.getTrgt("C1");
+        ...
+        An cn = (An) project.getTrgt("Cn");
+        B1 p1 = (B1) project.getTrgt("P1");
+        ...
+        Bm pm = (Bm) project.getTrgt("Pm");
+        // compute produced targets p1, ..., pm from program and
+        // consumed targets c1, ..., cn
+        ...
+    }
+}
+</pre>
+</td></tr></tbody></table>
+
+<p>To run the analysis, class <tt>ExampleAnalysis</tt> must be compiled to a
+<tt>.class</tt> file that occurs in some element (directory or jar/zip file) of
+the path specified by property <tt>chord.java.analysis.path</tt>.  This causes
+the analysis to be included in a Chord project as a task that is represented
+as a separate object of class <tt>ExampleAnalysis</tt>.
+<p>The <tt>@Chord</tt> annotation, defined in class
+<a href="http://chord.stanford.edu/javadoc/chord/project/Chord.html"><tt>chord.project.Chord</tt></a>, specifies via fields
+the following aspects of the analysis:
+<ul><li>Field <tt>name</tt> specifies the name of the analysis (<tt>&lt;ANALYSIS_NAME&gt;</tt>).
+<li>Field <tt>consumes</tt> specifies the names of targets that are consumed by the
+analysis (<tt>C1</tt>, ..., <tt>Cn</tt>).
+<li>Field <tt>produces</tt> specifies the names of targets that are produced by the
+analysis (<tt>P1</tt>, ..., <tt>Pm</tt>).
+<li>Fields <tt>namesOfTypes</tt> and <tt>types</tt> specify the types of targets.  There
+is a 1-to-1 correspondence between the arrays denoted by these two fields,
+e.g., the type of the target named <tt>C1</tt> is class <tt>A1</tt>, and so on.  In
+principle, the type of <i>any</i> target in the project can be specified here.
+In practice, however, the types of only the targets declared as
+consumed/produced by this analysis are specified.  Moreover, although the type
+of each target that is consumed/produced by the above analysis is specified in
+the above annotation, in practice the types of hardly any targets need to be
+explicitly specified, because they can be automatically inferred by Chord from
+analyses created using more specialized templates discussed below that also
+consume/produce those targets.
+</ul>
+<p>The code of the analysis must be supplied in the <tt>run()</tt> method.  This
+method typically does the following in order:
+(1) retrieves the program being analyzed and the representation of each
+consumed/produced target from the project;
+(2) performs some computation that uses the program and the consumed targets
+as inputs; and
+(3) writes the outputs of the computation to the produced targets.
+<p>The analysis templates presented in the following sections are more specialized
+forms of the <tt>JavaAnalysis</tt> template: they constrain the number and kinds of
+consumed/produced targets and/or the analysis code in the <tt>run()</tt> method.
+
+<h3><a name="id2">ProgramDom</a></h3>
+
+<p>Class <a href="http://chord.stanford.edu/javadoc/chord/project/analyses/ProgramDom.html"><tt>chord.project.analyses.ProgramDom</tt></a>
+is a template for writing a <i>program domain analysis</i>.
+A <i>program domain</i> represents an indexed set of values of a fixed
+kind, typically from the program being analyzed, such as the set of all methods
+in the program, the set of all fields in the program, etc.  Indices are 
+assigned starting from 0 and in the order in which values are added to the set.
+A program domain primarily serves as an input to Datalog analyses
+(see Section <a href="#sec:dlog">*</a>).  Thus, it is a kind of target (i.e.,
+analysis result) in a Chord project.  A common way to define a program domain
+is to create a program domain analysis by extending class <tt>ProgramDom</tt> as
+follows:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+import chord.project.Chord;
+import chord.project.ClassicProject;
+import chord.project.analyses.ProgramDom;
+import chord.program.Program;
+
+@Chord(
+    name = "&lt;DOM_NAME&gt;",
+    consumes = { "C1", ..., "Cn" }
+)
+public class ExampleDom extends ProgramDom&lt;DOM_TYPE&gt; {
+    @Override public void fill() {
+        Program p = Program.g();
+        ClassicProject project = ClassicProject.g();
+        A1 c1 = (A1) project.getTrgt("C1");
+        ...
+        An cn = (An) project.getTrgt("Cn");
+        // populate domain using program and consumed targets c1, ..., cn
+        for (...) {
+            DOM_TYPE e = ...;
+            add(e); 
+        }
+    }
+}
+</pre>
+</td></tr></tbody></table>
+
+<p>To run the analysis, class <tt>ExampleDom</tt> must be compiled to a <tt>.class</tt>
+file that occurs in some element (directory or jar/zip file) of the path
+specified by property <tt>chord.java.analysis.path</tt>.  This causes the
+analysis to be included in a Chord project as a task that is represented as a
+separate object of class <tt>ExampleDom</tt>.  Moreover, that object also denotes
+a target in the Chord project.  Both the task and target have the same name
+<tt>&lt;DOM_NAME&gt;</tt>.
+<p>The <tt>ProgramDom</tt> template can be viewed as providing the following
+specialized form of the general <tt>JavaAnalysis</tt> template:
+<ul><li>It consumes any number and kinds of targets explicitly declared in the 
+<tt>@Chord</tt> annotation (<tt>C1</tt>, ..., <tt>Cn</tt>).
+<li>It produces a single target, namely, the defined program domain itself
+(named <tt>&lt;DOM_NAME&gt;</tt> and of type <tt>ExampleDom</tt>).  It is a runtime error
+to explicitly declare any produced targets in the <tt>@Chord</tt> annotation (see
+below).
+<li>Its <tt>run()</tt> method adds values to the defined program domain.  Typically,
+it suffices to override the <tt>fill()</tt> method (which is called by the
+<tt>run()</tt> method) and call from it the <tt>add(e)</tt> method for each value
+<tt>e</tt> to be added to the domain in order.
+</ul>
+<p>It is a runtime error to explicitly specify any produced targets in the
+<tt>@Chord</tt> annotation of a class extending <tt>ProgramDom</tt>.  If you wish to
+define an analysis that produces additional targets besides a program domain,
+then you can still define the program domain in a class such as
+<tt>ExampleDom</tt> that extends <tt>ProgramDom</tt>, but you must not annotate it
+with the <tt>@Chord</tt> annotation (since this annotation causes the class to be 
+egarded as defining an analysis).  Instead, define the analysis in a separate
+class that extends <tt>JavaAnalysis</tt>, as follows:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+import chord.project.Chord;
+import chord.project.ClassicProject;
+import chord.project.analyses.JavaAnalysis;
+
+@Chord(
+    name = "&lt;ANALYSIS_NAME&gt;",
+    consumes = { "C1", ..., "Cn" },
+    produces = { "&lt;DOM_NAME&gt;", ... }
+)
+public class ExampleAnalysis extends JavaAnalysis {
+    @Override public void run() {
+        ExampleDom d = (ExampleDom) ClassicProject.g().getTrgt("&lt;DOM_NAME&gt;");
+        d.run();  // produce domain named &lt;DOM_NAME&gt;
+        ...
+    }
+}
+</pre>
+</td></tr></tbody></table>
+
+<p>Note that targets <tt>C1</tt>, ..., <tt>Cn</tt> that were declared as consumed in
+the <tt>@Chord</tt> annotation of class <tt>ExampleDom</tt> (and any other fields
+such as <tt>namesOfTypes</tt> and <tt>types</tt>) must now be provided in the
+<tt>@Chord</tt> annotation of class <tt>ExampleAnalysis</tt>.
+
+<h3><a name="id3">ProgramRel</a></h3>
+
+<p>Class <a href="http://chord.stanford.edu/javadoc/chord/project/analyses/ProgramRel.html"><tt>chord.project.analyses.ProgramRel</tt></a>
+is a template for writing a <i>program relation analysis</i>.
+A <i>program relation</i> represents a set of tuples over one or more fixed 
+program domains.  A program relation primarily serves as an input or output of
+Datalog analyses (see Section <a href="#sec:dlog">*</a>).  Thus, it is a kind of
+target (i.e., analysis result) in a Chord project.  A common way to define a
+program relation is to create a program domain analysis by extending class
+<tt>ProgramRel</tt> as follows:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+import chord.project.Chord;
+import chord.project.ClassicProject;
+import chord.project.analyses.ProgramDom;
+import chord.project.analyses.ProgramRel;
+import chord.program.Program;
+
+@Chord(
+    name = "&lt;REL_NAME&gt;",
+    consumes = { "C1", ..., "Cn" },
+    sign = "&lt;DOM_NAMES&gt;:&lt;DOM_ORDER&gt;"
+)
+public class ExampleRel extends ProgramRel {
+    @Override public void fill() {
+        Program p = Program.g();
+        ProgramDom&lt;T1&gt; d1 = doms[0];
+        ...
+        ProgramDom&lt;Tm&gt; dm = doms[m-1];
+        ClassicProject project = ClassicProject.g();
+        A1 c1 = (A1) project.getTrgt("C1");
+        ...
+        An cn = (An) project.getTrgt("Cn");
+        // populate relation using program, its domains d1, ..., dm, and
+        // consumed targets c1, ..., cn
+        for (...) {
+            T1 o1 = ...;
+            Tm om = ...;
+            add(o1, ..., om); 
+        }
+    }
+}
+</pre>
+</td></tr></tbody></table>
+
+<p>To run the analysis, class <tt>ExampleRel</tt> must be compiled to a <tt>.class</tt>
+file that occurs in some element (directory or jar/zip file) of the path
+specified by property <tt>chord.java.analysis.path</tt>.  This causes the
+analysis to be included in a Chord project as a task that is represented as a
+separate object of class <tt>ExampleRel</tt>.  Moreover, that object also denotes
+a target in the Chord project.  Both the task and target have the same name
+<tt>&lt;REL_NAME&gt;</tt>.
+<p>The <tt>ProgramRel</tt> template can be viewed as providing the following
+specialized form of the general <tt>JavaAnalysis</tt> template:
+<ul><li>It consumes any number and kinds of targets explicitly declared in the
+<tt>@Chord</tt> annotation (<tt>C1</tt>, ..., <tt>Cn</tt>) as well as implicit targets
+corresponding to the program domains in the schema of the defined program
+relation (named <tt>D1</tt>, ..., <tt>Dm</tt> and having type <tt>ProgramDom</tt>).
+<li>It produces a single target, namely, the defined program relation itself
+(named <tt>&lt;REL_NAME&gt;</tt> and of type <tt>ExampleRel</tt>).  It is a runtime error
+to explicitly declare any produced targets in the <tt>@Chord</tt> annotation (see
+below).
+<li>Its <tt>run()</tt> method adds tuples to the defined program relation.  Typically,
+it suffices to override the <tt>fill()</tt> method (which is called by the
+<tt>run()</tt> method) and call from it the <tt>add(o1, ..., om)</tt> method for each
+tuple (<tt>o1</tt>, ..., <tt>om</tt>) to be added to the relation.
+</ul>
+<p>Unlike for program domains, the order in which tuples are added to a program
+relation is irrelevant.  But the relative ordering of the program domains over
+which the program relation is declared matters heavily for performance.
+This is because each program relation in Chord is represented symbolically (as
+oppoosed to explicitly) using a data structure called a Binary Decision Diagram
+(BDD for short).  This in turn is because in pratice, a program relation (e.g.,
+one representing context-sensitive points-to information)
+can contain millions or billions of tuples even for a moderately-sized
+input Java program; representing such a large number of tuples explicitly is
+prohibitively and needlessly expensive.  The size of a BDD, on the other hand,
+does not depend at all upon the number of tuples in the program relation that
+the BDD represents.  Instead, it depends heavily upon the relative ordering
+of the program domains over which the program relation is declared.
+Hence, the <tt>@Chord</tt> annotation on a class such as <tt>ExampleRel</tt> that
+extends <tt>ProgramRel</tt> is required to have a <tt>sign</tt> field whose value is
+the <i>sign</i> of the program relation.
+A sign is a string of the form <tt>&lt;DOM_NAMES&gt;:&lt;DOM_ORDER&gt;</tt> where:
+<ul><li><p><tt>&lt;DOM_NAMES&gt;</tt> is mandatory and specifies the relation's <i>schema</i>: a comma-separated list of names of
+the domains over which the relation is defined, with each domain name suffixed with a
+non-negative integer that is typically 0 and must be unique across multiple
+occurrences of the same domain name.
+The order of domain names in the schema is <i>irrelevant</i>: users must
+pick this order purely based on what order they find most convenient to remember.
+<p>For example, suppose the program relation represents the result of Class Hierarchy
+Analysis (CHA), i.e., it contains each tuple of the form (<i>m<sub>1</sub></i>,<i>t</i>,<i>m<sub>2</sub></i>) such that
+method <i>m<sub>2</sub></i> is the resolved method of an invokevirtual or invokeinterface call
+with resolved method <i>m<sub>1</sub></i> on an object of class <i>t</i>.  Let <tt>M</tt> and <tt>T</tt>
+denote the names of the program domains representing the set of all methods
+and the set of all classes, respectively, in the Java program being analyzed.
+Then, <tt>&lt;DOM_NAMES&gt;</tt> for this program relation could be any of "<tt>M0,T0,M1</tt>",
+"<tt>M1,T0,M0</tt>", "<tt>M0,T1,M1</tt>", and so on.
+<li><p><tt>&lt;DOM_ORDER&gt;</tt> is optional and determines the relation's representation as a
+BDD. It is a permutation of the names in <tt>DOM_NAMES&gt;</tt> with a separator
+`&#95;' or `x' between consecutive names.  The order of names in this
+list, and the kind of separators used between them, are what determines both
+the size of the BDD and the performance of operations on it (such as join,
+selection, projection, etc.).
+<p>An example value of <tt>&lt;DOM_ORDER&gt;</tt> for the
+CHA program relation above with <tt>&lt;DOM_LIST&gt;</tt> as "<tt>M0,T0,M1</tt>"  is
+"<tt>M0xM1_T0</tt>"; another example value is "<tt>M1_T0_M0</tt>".
+</ul>
+<p>Chapter <a href="datalog.html">*</a> describes how BDDs are represented
+(Section <a href="datalog.html#sec:bdd">*</a>) and how you can tune their size and the
+performance of operations on them (Section <a href="datalog.html#id2">*</a>).
+<p>It is a runtime error to explicitly specify any produced targets in the
+<tt>@Chord</tt> annotation of a class extending <tt>ProgramRel</tt>.  If you wish to
+define an analysis that produces additional targets besides a program relation,
+then you can still define the program relation in a class such as
+<tt>ExampleRel</tt> that extends <tt>ProgramRel</tt>, but you must not annotate it
+with the <tt>@Chord</tt> annotation (since this annotation causes the class to be 
+egarded as defining an analysis).  Instead, define the analysis in a separate
+class that extends <tt>JavaAnalysis</tt>, as follows:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+import chord.project.Chord;
+import chord.project.ClassicProject;
+import chord.project.analyses.JavaAnalysis;
+
+@Chord(
+    name = "&lt;ANALYSIS_NAME&gt;",
+    consumes = { "C1", ..., "Cn" },
+    produces = { "&lt;REL_NAME&gt;", ... },
+    namesOfSigns = { "&lt;REL_NAME&gt;", ... },
+    signs = { "&lt;DOM_ORDER&gt;:&lt;DOM_NAME&gt;", ... }
+)
+public class ExampleAnalysis extends JavaAnalysis {
+    @Override public void run() {
+        ExampleRel r = (ExampleRel) ClassicProject.g().getTrgt("&lt;REL_NAME&gt;");
+        r.run();  // produce program relation named &lt;REL_NAME&gt;
+    }
+}
+</pre>
+</td></tr></tbody></table>
+
+<p>Note that targets <tt>C1</tt>, ..., <tt>Cn</tt> that were declared as consumed in
+the <tt>@Chord</tt> annotation of class <tt>ExampleRel</tt> (and any other fields
+such as <tt>namesOfTypes</tt> and <tt>types</tt>) must now be provided in the
+<tt>@Chord</tt> annotation of class <tt>ExampleAnalysis</tt>.  Just like the
+1-to-1 correspondence between the values of fields <tt>namesOfTypes</tt> and
+<tt>types</tt>, there is a 1-to-1 correspondence between the values of fields
+<tt>namesOfSigns</tt> and <tt>signs</tt>, which allow relating the name of any program
+relation in the project with its sign.
+
+<h3><a name="sec:dlog">DlogAnalysis</a></h3>
+
+<p>A common way to rapidly prototype analyses in Chord is using a declarative
+logic-programming language called Datalog.  A Datalog analysis is defined in a
+<tt>.dlog</tt> file that primarily specifies the following:
+<ul><li>A set of <i>program domains</i> <tt>D1</tt>, ..., <tt>Dk</tt>.  A program domain is a
+set of values of a fixed kind.  Each program domain in a Chord project is
+a target that is represented as a separate object of class <tt>ProgramDom</tt>
+(see Section <a href="#id2">*</a>).
+<li>A set of <i>program relations</i>, including input relations <tt>I1</tt>, ..., <tt>In</tt>
+and output relations <tt>O1</tt>, ..., <tt>Om</tt>.  A program relation is a set of
+tuples over one or more fixed program domains <tt>D1</tt>, ..., <tt>Dk</tt>.  Each program
+relation in a Chord project is a target that is represented as a separate object
+of class <tt>ProgramRel</tt> (see Section <a href="#id3">*</a>).
+<li>A set of rules (constraints) <tt>R</tt> specifying how to compute the output
+relations from the input relations.
+</ul>
+An example such file is shown in Chapter <a href="datalog.html">*</a> which also
+explains all aspects of Datalog analyses.
+<p>To run the analysis, the <tt>.dlog</tt> file must occur in some element (directory
+or jar/zip file) of the path specified by property <tt>chord.dlog.analysis.path</tt>.
+ This causes the analysis to be included in a Chord project as a task that is
+represented as a separate object of class
+<a href="http://chord.stanford.edu/javadoc/chord/project/analyses/DlogAnalysis.html"><tt>chord.project.analyses.DlogAnalysis</tt></a>.
+Note that, unlike class <tt>JavaAnalysis</tt>, users must not extend class
+<tt>DlogAnalysis</tt> but must instead define the analysis in a <tt>.dlog</tt> file.
+<p>The <tt>DlogAnalysis</tt> template can be viewed as providing the following
+specialized form of the general <tt>JavaAnalysis</tt> template:
+<ul><li>It consumes targets <tt>D1</tt>, ..., <tt>Dk</tt> of type <tt>ProgramDom</tt> and
+<tt>I1</tt>, ..., <tt>In</tt> of type <tt>ProgramRel</tt>.
+<li>It produces targets <tt>O1</tt>, ..., <tt>Om</tt> of type <tt>ProgramRel</tt>.
+<li>Its <tt>run()</tt> method executes Datalog solver <tt>bddbddb</tt> to compute output
+relations <tt>O1</tt>, ..., <tt>Om</tt> from input relations <tt>I1</tt>, ..., <tt>In</tt>
+by solving constraints <tt>R</tt>.
+</ul>
+
+<h3><a name="sec:dynamic">DynamicAnalysis</a></h3>
+
+<p><b>Under construction</b>
+
+<h3><a name="sec:rhs">RHSAnalysis</a></h3>
+
+<p><b>Under construction</b>
+
+
+<hr /><address>mhn@cs.stanford.edu</address><br />
+<table width="100%" cellpadding=0 cellspacing=2><tr>
+    <td bgcolor="#99ccff"><a href="running.html"><img border="0" alt="Running an Analysis" src="next.png"></a></td><td bgcolor="#99ccff"><a href="developer_guide.html"><img border="0" alt="Guide for Developers" src="up.png"></a></td><td bgcolor="#99ccff"><a href="project.html"><img border="0" alt="A Chord Project: Tasks, Targets, and Dependencies" src="previous.png"></a></td><td align="center" bgcolor="#99ccff" width="100%"><b>Writing an Analysis</b></td></tr></table></body></html>

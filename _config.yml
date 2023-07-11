@@ -1,0 +1,15 @@
+title: "Mayur Naik"
+email: mhnaik@cis.upenn.edu
+description: > # this means to ignore newlines until "baseurl:"
+baseurl: "https://www.cis.upenn.edu/~mhnaik" # the base hostname & protocol for your site
+navigation:
+  - name: Home
+    link: /index.html
+  - name: Students
+    link: /students.html
+  - name: Publications
+    link: /pubs.html
+  - name: Artifacts
+    link: /software.html
+# Build settings
+markdown: kramdown

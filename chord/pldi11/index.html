@@ -1,0 +1,339 @@
+<html>
+<head>
+<title>PLDI 2011 Chord Tutorial</title>
+</head>
+<body>
+
+<center><h1>Chord: A Versatile Platform for Program Analysis</h1></center>
+<center><h2><a href="http://pldi11.cs.utah.edu/">PLDI 2011</a> Tutorial</h2></center>
+<center><h3>Saturday, June 4, 2011, 8:30 am - 12:00 noon</h3></center>
+
+<center>[ <a href="#intro"><b>Introduction</b></a>
+  | <a href="#tutorial"><b>Structure of Tutorial</b></a>
+  | <a href="#about"><b>Learn More</b></a> ]</center>
+
+<p>
+
+<a name="intro"/>
+<table border=0 cellpadding=4 width="100%">
+<tr><td width="100%" bgcolor="#ccccff">
+<font face="Cambria"><center><b>Introduction</b></center></font>
+</td></tr>
+</table>
+<p>
+
+Languages that compile to Java bytecode are becoming mainstream on modern
+computing platforms, including parallel, mobile, and cloud computing.  For example,
+mobile apps for the Andriod platform are written in Java, and much of the open-source
+software infrastructure for cloud- and cluster-computing (e.g., Apache Hadoop) is
+written in Java.  These platforms pose unprecedented challenges to software reliability,
+security, performance, scalability, energy efficiency, and programmer productivity.
+Program analysis can play an important role in addressing these challenges.
+<p>
+Chord is an extensible, open-source, portable program analysis platform that enables
+users to productively design, implement, combine, and evaluate a broad variety of
+static and dynamic program analyses for Java bytecode.  It has the following key
+features:
+
+<ul>
+<li>
+It provides various off-the-shelf analyses
+(e.g., various may-alias and call-graph analyses; thread-escape
+analysis; static and dynamic concurrency analyses for
+finding races, deadlocks, atomicity violations; etc.)
+<p>
+</li><li>
+It allows users to express a broad range of analyses,
+including both static and dynamic analyses, analyses
+written imperatively in Java or declaratively in Datalog,
+summary-based as well as cloning-based inter-procedural
+context-sensitive analyses, iterative refinement-based analyses,
+client-driven analyses, and combined static/dynamic analyses.
+<p>
+</li><li>
+It executes analyses in a demand-driven fashion,
+caches results computed by each analysis for reuse by other analyses
+without re-computation, and can execute analyses without dependencies between them
+in parallel.
+<p>
+</li><li>
+It guarantees that the result is the same
+regardless of the order in which different analyses are executed;
+moreover, results can be shared across different runs.
+</ul>
+
+<p>
+<a name="tutorial"/>
+<table border=0 cellpadding=4 width="100%">
+<tr><td width="100%" bgcolor="#ccccff">
+<font face="Cambria"><center><b>Structure of Tutorial</b></center></font>
+</td></tr>
+</table>
+<table align="right" cellpadding="5">
+<tr><td><img src="chord_arch.png" border="1px" width="500"/></td></tr>
+<caption align="bottom"><i>Architecture of Chord.</i></caption>
+</table>
+<p>
+
+  The goal of the tutorial is to provide program analysis beginners
+  and experts alike with systematic and effective techniques for
+  designing, implementing, evaluating, and combining program analyses.
+
+  The tutorial will have the following structure:
+
+<ol>
+<li><a href="#rep">Program Representation</a></li>
+<li><a href="#intra">Intra-Procedural Static Analysis</a></li>
+<li><a href="#inter">Inter-Procedural Static Analysis</a></li>
+<li><a href="#dynamic">Dynamic Analysis</a></li>
+<li><a href="#composing">Composing Analyses</a></li>
+</ol>
+
+<a name="rep"/>
+<h2>1. Program Representation</h2>
+
+This part of the tutorial will present <i>scope construction</i>
+and <i>program representation</i> in Chord.
+A scope construction algorithm determines which parts of
+the input Java program must be analyzed.  The algorithms discussed
+will include CHA (Class Hierarchy Analysis), RTA (Rapid Type
+Analysis), and dynamic analysis.  Techniques used in Chord to resolve reflection
+and provide stubs for native methods will also be discussed.
+This part of the tutorial will also describe the program
+representation used by Chord.  It is a three-address (quad)
+representation, optionally in Static Single Assignment (SSA) form,
+that is more suitable for analysis than Java bytecode.
+
+<a name="intra"/>
+<h2>2. Intra-Procedural Static Analysis</h2>
+
+This part of the tutorial will explain how to rapidly implement
+a basic static analysis in Chord.  A classic yet realistic static
+analysis, such as a flow- and context-insensitive (Andersen's)
+points-to analysis with on-the-fly call graph construction, will be
+presented.  This part will introduce three of the many
+<i>program analysis templates</i> that Chord provides: Program Domain,
+Program Relation, and Datalog Analysis.
+<ul>
+<li>A <i>program domain</i>
+is a finite set of artifacts of a particular kind from the
+program being analyzed, e.g., a domain <i>M</i> denoting the set of
+all methods in the program, a domain <i>H</i> denoting the set of all
+object allocation sites, etc. <p>
+</li>
+<li>A <i>program relation</i> is a relation over one or more program
+domains, e.g., a relation containing each pair <i>(m,h)</i> such that
+object allocation site <i>h in H</i> is contained in the body of
+method <i>m in M</i>. <p>
+</li>
+<li>A <i>Datalog analysis</i> is a set of rules that declaratively
+specifies how a set of output relations is computed from a set of
+input relations.  For the Datalog analysis presented in this part of
+the tutorial, all domains and input relations will be constructed
+imperatively in Java and will denote basic program facts, but
+subsequent parts of the tutorial will show how these domains and
+relations could be produced by other (Java or Datalog) analyses
+themselves.
+</li>
+</ul>
+
+<a name="inter"/>
+<h2>3. Inter-Procedural Static Analysis</h2>
+
+This part of the tutorial will explain how to implement
+context-sensitive static analyses in Chord.  Chord provides two
+frameworks for context-sensitive static analysis: cloning-based (e.g.,
+k-CFA, k-object-sensitivity, etc.) and summary-based (i.e., the
+Reps-Horwitz-Sagiv inter-procedural dataflow analysis framework).
+Both these frameworks are highly parametric.  For instance, the
+cloning-based framework allows varying degrees of context- and
+object-sensitivity to be used for different parts of the program
+being analyzed.
+
+<a name="dynamic"/>
+<h2>4. Dynamic Analysis</h2>
+
+<table align="right" cellpadding="5">
+<tr><td><img src="heap.png" width="320"/></td></tr>
+<caption align="bottom"><i>Runtime heap output by a dynamic analysis.</i></caption>
+</table>
+
+This part of the tutorial will explain the dynamic analysis
+capabilities of Chord. These capabilities are the most versatile of
+any existing dynamic analysis framework for Java bytecode, particularly the
+ability to instrument the entire JDK (including classes in package
+java.lang). They include support for:
+
+<ul>
+<li>offline as well as load-time instrumentation of Java bytecode;<p></li>
+<li>processing of dynamic analysis events online in the same JVM or
+offline in a different JVM with an uninstrumented JDK (the latter
+circumvents performance and correctness problems that can arise if a
+single JVM with an instrumented JDK is used to generate and handle
+events); and<p></li>
+<li>allowing the event-generating and event-handling JVMs to run
+either serially (by storing the entire trace of events to a regular
+file) or in parallel (by streaming the trace of events in a piped
+file).</li>
+</ul>
+
+Besides explaining these capabilities, this part of the tutorial will
+also explain the diverse purposes for which dynamic analysis in Chord
+has been used, including:
+<ul>
+<li>a methodology of how dynamic analysis can be
+used to narrow the design space of static analysis, e.g., how dynamic
+analysis can be useful to quickly eliminate, even without implementing
+the static analysis, program abstractions that are inherently
+imprecise for the client at hand (e.g.,
+[<a href="#oopsla10">OOPSLA'10</a>]);<p></li>
+<li> how dynamic analysis can be used
+to perform predictive testing, with examples of dynamic race,
+deadlock, and atomicity violation checkers implemented in Chord (e.g.,
+[<a href="#fse10">FSE'10</a>]); and<p></li>
+<li>how dynamic analysis can be
+combined with static analysis in powerful and complementary ways,
+e.g., how dynamic analysis can be used to efficiently guess sparse
+yet precise program abstractions for a static analysis to use
+(e.g., [<a href="#popl12">POPL'12</a>]).</li>
+</ul>
+
+<a name="composing"/>
+<h2>5. Composing Analyses</h2>
+
+This part of the tutorial will explain how to compose disparate
+analyses written in Chord to build advanced analyses productively and
+execute them efficiently and reliably.  Chord adapts
+the <a href="http://habanero.rice.edu/cnc.html">Habanero Concurrent
+Collections (CnC)</a> declarative parallel language and the
+<a href="http://habanero.rice.edu/hj.html">Habanero Java</a> runtime
+for this purpose.
+This aspect, which gives the Chord platform its versatility, is
+perhaps its most distinctive compared to other program analysis
+frameworks.  This part of the tutorial will present the following:
+<ul>
+<li>Every analysis template predefined in Chord---a
+Program Domain, a Program Relation, a Datalog Analysis, an RHS
+  Analysis, a Dynamic
+Analysis, etc.---is a specialized form of a generic Program Analysis,
+which can be an arbitrary piece of code.<p></li>
+<li>Individual analyses can be linked together via
+lightweight, user-specified data- and control-dependencies.  Many of
+these dependencies are implicit for analyses derived from the
+predefined analysis templates and thus require no additional user
+annotations.<p></li>
+<li>The above dependencies can be used to build
+advanced analyses such as iterative refinement-based analyses,
+client-driven analyses, and combined static/dynamic analyses.<p></li>
+<li>
+The resulting analyses are automatically executed efficiently and reliably, namely,
+analyses are executed in a demand-driven manner, results of analyses
+are cached for reuse without re-computation, and independent
+analyses are scheduled in parallel while ensuring determinism.</li>
+</ul>
+<center>
+<table align="center" cellpadding="5"><tr><td>
+<img src="cipa_taskgraph_reduced.png" border="1px" width="1000"/>
+<caption align="bottom"><i>The dependence graph of a pointer analysis in Chord.</i></caption>
+</td></tr></table>
+</center>
+<p>
+
+<a name="about"/>
+<table border=0 cellpadding=4 width="100%">
+<tr><td width="100%" bgcolor="#ccccff">
+<font face="Cambria"><center><b>Learn More</b></center></font>
+</td></tr>
+</table>
+<p>
+
+<h2>About the Presenter</h2>
+
+<a href="http://berkeley.intel-research.net/mnaik">Mayur Naik</a> is
+ a researcher at Intel Labs Berkeley.  His research interests lie in
+ the areas of programming languages and software engineering with a
+ current emphasis on program analysis and its applications to problems
+ in parallel, mobile, and cloud computing.  He obtained his PhD in computer
+ science from Stanford University in 2007.
+<p>
+The tutorial will build upon his experience using Chord to
+  implement advanced program analyses (e.g.,
+  [<a href="#popl12">POPL'12</a>, <a href="#pldi11">PLDI'11</a>, <a href="#fse10">FSE'10</a>,
+  <a href="#icse09">ICSE'09</a>, <a href="#pldi06">PLDI'06</a>]),
+  perform extensive empirical studies (e.g.,
+  [<a href="#oopsla10">OOPSLA'10</a>, <a href="#popl11">POPL'11</a>]),
+  and build complex systems involving program analysis (e.g.,
+  [<a href="#eurosys11">EuroSys'11</a>, <a href="#nips10">NIPS'10</a>, <a href="#icse11">ICSE'11</a>]).
+<p>
+
+<h2>Resources</h2>
+
+<ul>
+<li><a href="http://pag.gatech.edu/chord">Homepage</a></li>
+<li><a href="http://code.google.com/p/jchord/downloads/list">Download Chord</a></li>
+<li><a href="../user_guide/">User Guide</a></li>
+<li><a href="../javadoc/">Javadoc</a> of Chord's source code</li>
+</ul>
+
+<h2>References</h2>
+
+The below references describe tools, systems, and frameworks that have
+ been built using Chord and are publicly available.
+<p>
+<table cellpadding="5">
+<a name="popl12"/>
+<tr><td>[POPL'12]</td><td>Mayur Naik, Hongseok Yang, Ghila Castelnuovo, Mooly Sagiv.
+<b><a href="../../pubs/popl12.pdf">Abstractions from Tests</a></b>.</td>
+</tr>
+
+<a name="eurosys11"/>
+<tr><td>[EuroSys'11]</td><td>Byung-Gon Chun, Sunghwan Ihm, Petros Maniatis, Mayur Naik, and Ashwin Patti.
+<b><a href="../../pubs/eurosys11.pdf">CloneCloud: Elastic Execution between Mobile Device and Cloud</a></b>.</td>
+</tr>
+<a name="icse11"/>
+<tr><td>[ICSE'11]</td><td>Ariel Rabkin and Randy Katz.
+<b><a href="http://www.cs.berkeley.edu/~asrabkin/drafts/icse11.pdf">Static Extraction of Program Configuration Options</a></b>.</td>
+</tr>
+
+<a name="pldi11"/>
+<tr><td>[PLDI'11]</td><td>Percy Liang and Mayur Naik.
+<b><a href="../../pubs/pldi11.pdf">Scaling Abstraction Refinement via Pruning</a></b>.</td>
+</tr>
+
+<a name="popl11"/>
+<tr><td>[POPL'11]</td><td>Percy Liang, Omer Tripp, and Mayur Naik.
+<b><a href="../../pubs/popl11.pdf">Learning Minimal Abstractions</a></b>.</td>
+</tr>
+
+<a name="nips10"/>
+<tr><td>[NIPS'10]</td><td>Ling Huang, Jinzhu Jia, Bin Yu, Byung-Gon Chun, Petros Maniatis, and Mayur Naik.
+<b><a href="../../pubs/nips10.pdf">Predicting Execution Time of Computer Programs Using Sparse Polynomial Regression</a></b>.</td>
+</tr>
+
+<a name="oopsla10"/>
+<tr><td>[OOPSLA'10]</td><td>Percy Liang, Omer Tripp, Mayur Naik, and Mooly Sagiv. 
+<b><a href="../../pubs/oopsla10.pdf">A Dynamic Evaluation of the Precision of Static Heap Abstractions</a></b>.
+</td>
+</tr>
+
+<a name="fse10"/>
+<tr><td>[FSE'10]</td><td>Pallavi Joshi, Mayur Naik, Koushik Sen, and David Gay.
+<b><a href="../../pubs/fse10.pdf">An Effective Dynamic Analysis for Detecting Generalized Deadlocks</a></b>.
+</td>
+</tr>
+
+<a name="icse09"/>
+<tr><td>[ICSE'09]</td><td>Mayur Naik, Chang-Seo Park, Koushik Sen, and David Gay.
+<b><a href="../../pubs/icse09.pdf">Effective Static Deadlock Detection</a></b>.
+</td>
+</tr>
+
+<a name="pldi06"/>
+<tr><td>[PLDI'06]</td><td>Mayur Naik, Alex Aiken, and John Whaley.
+<b><a href="../../pubs/pldi06.pdf">Effective Static Race Detection for Java</a></b>.</td>
+</tr>
+</table>
+
+</body>
+</html>
+

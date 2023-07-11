@@ -1,0 +1,606 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<!-- XML file produced from file: user_guide.tex
+     using Hyperlatex v 2.7 (c) Otfried Cheong
+     on Emacs 22.2.1, Sat Apr 16 21:41:54 2011 -->
+<head>
+<title>Chord -- Java Program Representation</title>
+
+<style type="text/css">
+.maketitle { align : center }
+div.abstract { margin-left: 20%; margin-right: 10%; }
+h3.abstract  { align : center }
+div.verse, div.quote, div.quotation {
+  margin-left : 10%; 
+  margin-right : 10%;
+}
+</style>
+
+
+</head>
+<body>
+<table width="100%" cellpadding=0 cellspacing=2><tr>
+    <td bgcolor="#99ccff"><a href="project.html"><img border="0" alt="A Chord Project: Tasks, Targets, and Dependencies" src="next.png"></a></td><td bgcolor="#99ccff"><a href="developer_guide.html"><img border="0" alt="Guide for Developers" src="up.png"></a></td><td bgcolor="#99ccff"><a href="arch.html"><img border="0" alt="Architecture of Chord" src="previous.png"></a></td><td align="center" bgcolor="#99ccff" width="100%"><b>Java Program Representation</b></td></tr></table>
+<h2>Java Program Representation</h2>
+
+<p>Chord uses <a href="http://joeq.sourceforge.net/">Joeq</a> to translate
+Java bytecode, one class file at a time, into a three-address-like
+intermediate representation of the input Java program called <i>quadcode</i>.  This chapter describes all aspects of quadcode and how it
+relates to bytecode.  It first explains how to pretty-print bytecode
+and quadcode (Section <a href="#id1">*</a>) which is useful for
+debugging analyses and deciphering their output.  The remaining
+sections describe the quadcode representation along with the API of
+Joeq and Chord for navigating it.  Briefly, the representation
+consists of a set of classes that may be loaded
+(Section <a href="#sec:program">*</a>).  The representation of each class consists
+of a set of members (Section <a href="#id3">*</a>) which are the fields and methods
+of the class.  The representation of a concrete
+method (Section <a href="#sec:methods">*</a>) consists of a control-flow graph
+(CFG).  The representation of a CFG (Section <a href="#sec:cfgs">*</a>) consists
+of a set of registers and a set of basic blocks linked by directed edges
+denoting flow of control between basic blocks.
+Each basic block contains zero or more primitive statements called quads
+(Section <a href="#sec:quads">*</a>).  Finally, the most common way to traverse
+all quads is discussed (Section <a href="#sec:traversing">*</a>).
+
+<h3><a name="id1">Pretty-Printing</a></h3>
+
+<p>Consider the following Java program contained in
+file <tt>examples/hello_world/src/test/HelloWorld.java</tt> in Chord's
+main directory:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+package test;
+
+public class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello World!");
+    }
+}
+</pre>
+</td></tr></tbody></table>
+
+<p>First compile this program by running command <tt>ant</tt> in
+directory <tt>examples/hello_world/</tt>.
+<p>To pretty-print the bytecode representation of a class, run the following command:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+javap -classpath &lt;CLASS_PATH&gt; -bootclasspath &lt;BOOT_CLASS_PATH&gt; -private -verbose &lt;CLASS_NAME&gt;
+</pre>
+</td></tr></tbody></table>
+
+<p>where:
+<ul><li><code>&lt;CLASS_NAME&gt;</code> is the fully-qualified name of the class whose
+bytecode is to be printed (<tt>test.HelloWorld</tt> in our example).
+<li><code>&lt;CLASS_PATH&gt;</code> is the classpath of that class (<tt>examples/hello_world/</tt> in our example).
+<li><code>&lt;BOOT_CLASS_PATH&gt;</code> is the boot classpath; it is optional and must be supplied if
+<code>&lt;CLASS_NAME&gt;</code> is a class from the JDK standard library (e.g., <tt>java.util.ArrayList</tt>) that has
+been modified and written to a user-defined location (e.g., it has been instrumented by Chord and
+written to <tt>chord_output/boot_classes/</tt>).
+</ul>
+<p>Program <tt>javap</tt> comes along with the JVM.  The output of the
+above command for our example is as follows:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+Compiled from "HelloWorld.java"
+public class test.HelloWorld extends java.lang.Object
+  SourceFile: "HelloWorld.java"
+  minor version: 0
+  major version: 49
+  Constant pool:
+const #1 = Method   #6.#20; //  java/lang/Object."&lt;init&gt;":()V
+const #2 = Field    #21.#22;    //  java/lang/System.out:Ljava/io/PrintStream;
+const #3 = String   #23;    //  Hello World!
+const #4 = Method   #24.#25;    //  java/io/PrintStream.println:(Ljava/lang/String;)V
+const #5 = class    #26;    //  test/HelloWorld
+const #6 = class    #27;    //  java/lang/Object
+const #7 = Asciz    &lt;init&gt;;
+const #8 = Asciz    ()V;
+const #9 = Asciz    Code;
+const #10 = Asciz   LineNumberTable;
+const #11 = Asciz   LocalVariableTable;
+const #12 = Asciz   this;
+const #13 = Asciz   Ltest/HelloWorld;;
+const #14 = Asciz   main;
+const #15 = Asciz   ([Ljava/lang/String;)V;
+const #16 = Asciz   args;
+const #17 = Asciz   [Ljava/lang/String;;
+const #18 = Asciz   SourceFile;
+const #19 = Asciz   HelloWorld.java;
+const #20 = NameAndType #7:#8;//  "&lt;init&gt;":()V
+const #21 = class   #28;    //  java/lang/System
+const #22 = NameAndType #29:#30;//  out:Ljava/io/PrintStream;
+const #23 = Asciz   Hello World!;
+const #24 = class   #31;    //  java/io/PrintStream
+const #25 = NameAndType #32:#33;//  println:(Ljava/lang/String;)V
+const #26 = Asciz   test/HelloWorld;
+const #27 = Asciz   java/lang/Object;
+const #28 = Asciz   java/lang/System;
+const #29 = Asciz   out;
+const #30 = Asciz   Ljava/io/PrintStream;;
+const #31 = Asciz   java/io/PrintStream;
+const #32 = Asciz   println;
+const #33 = Asciz   (Ljava/lang/String;)V;
+
+{
+public test.HelloWorld();
+  Code:
+   Stack=1, Locals=1, Args_size=1
+   0:   aload_0
+   1:   invokespecial   #1; //Method java/lang/Object."&lt;init&gt;":()V
+   4:   return
+  LineNumberTable:
+   line 3: 0
+  LocalVariableTable:
+   Start  Length  Slot  Name   Signature
+   0      5      0    this       Ltest/HelloWorld;
+
+public static void main(java.lang.String[]);
+  Code:
+   Stack=2, Locals=1, Args_size=1
+   0:   getstatic   #2; //Field java/lang/System.out:Ljava/io/PrintStream;
+   3:   ldc #3; //String Hello World!
+   5:   invokevirtual   #4; //Method java/io/PrintStream.println:(Ljava/lang/String;)V
+   8:   return
+  LineNumberTable:
+   line 5: 0
+   line 6: 8
+  LocalVariableTable:
+   Start  Length  Slot  Name   Signature
+   0      9      0    args       [Ljava/lang/String;
+}
+</pre>
+</td></tr></tbody></table>
+
+<p>To pretty-print the quadcode representation of a class, run the following command:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+ant -Dchord.work.dir=&lt;WORK_DIR&gt; -Dchord.print.classes=&lt;CLASS_NAME&gt; \
+    -Dchord.verbose=0 -Dchord.out.file=&lt;OUT_FILE&gt; run
+</pre>
+</td></tr></tbody></table>
+
+<p>where:
+<ul><li><tt>&lt;WORK_DIR&gt;</tt> is a directory (<tt>examples/hello_world/</tt> in our example) 
+that contains a file named <tt>chord.properties</tt> which defines
+properties <tt>chord.main.class</tt> and <tt>chord.class.path</tt>
+specifying the main class and the classpath of the input Java program.
+Alternatively, these two properties can be defined directly on the
+above command-line.
+<li><tt>&lt;CLASS_NAME&gt;</tt> is the fully-qualified name of the class whose quadcode is to be printed
+(<tt>test.HelloWorld</tt> in our example).  Each occurrence of a `<tt>&#36;</tt>' in the class name
+must be replaced by a `<tt>&#35;</tt>'.
+<li><tt>&lt;OUT_FILE&gt;</tt> is the file to which the quadcode must be written; if left unspecified,
+the quadcode is written to the standard output.
+</ul>
+<p>The output of the above command for our example is as follows:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+*** Class: test.HelloWorld
+Method: main:([Ljava/lang/String;)V@test.HelloWorld
+    0#1
+    5#3
+    5#2
+    8#4
+Control flow graph for main:([Ljava/lang/String;)V@test.HelloWorld:
+BB0 (ENTRY) (in: &lt;none&gt;, out: BB2)
+
+BB2 (in: BB0 (ENTRY), out: BB1 (EXIT))
+1: GETSTATIC_A T1, .out
+3: MOVE_A T2, AConst: "Hello World!"
+2: INVOKEVIRTUAL_V println:(Ljava/lang/String;)V@java.io.PrintStream, (T1, T2)
+4: RETURN_V
+
+BB1 (EXIT)  (in: BB2, out: &lt;none&gt;)
+
+Exception handlers: []
+Register factory: Registers: 3
+</pre>
+</td></tr></tbody></table>
+
+
+<h3><a name="sec:program">Whole Program</a></h3>
+
+<p>This and the following sections describe the quadcode representation
+along with the API of Joeq and Chord for navigating it.
+This API is contained in
+packages <a href="http://chord.stanford.edu/javadoc/chord/program/package-summary.html"><tt>chord.program</tt></a>, <a href="http://chord.stanford.edu/javadoc/joeq/Class/package-summary.html"><tt>joeq.Class</tt></a>,
+and <a href="http://chord.stanford.edu/javadoc/joeq/Compiler/Quad/package-summary.html"><tt>joeq.Compiler.Quad</tt></a>.
+<p>The quadcode representation of the whole program is a unique global
+object of
+class <a href="http://chord.stanford.edu/javadoc/chord/program/Program.html"><tt>chord.program.Program</tt></a>
+which can be obtained by calling static
+method <a href="http://chord.stanford.edu/javadoc/chord/program/Program.html&#35;g()"><tt>chord.program.Program.g()</tt></a>.
+This class provides a rich API (in the form of public instance
+methods) to access various parts of the representation, most notably:
+<table border=1 cellpadding=10><tbody><tr><td colspan="1" align="LEFT">
+
+<code>IndexSet&lt;jq_Type&gt; getTypes()</code> </td><td colspan="1" align="LEFT"> All types referenced in classes that may be loaded. </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>IndexSet&lt;jq_Reference&gt; getClasses()</code> </td><td colspan="1" align="LEFT"> All classes that may be loaded.* </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>IndexSet&lt;jq_Method&gt; getMethods()</code> </td><td colspan="1" align="LEFT"> All methods that may be called. </td></tr></tbody></table>
+
+<p>* Includes both classes/interfaces and array types, represented as objects
+of <tt>jq_Class</tt> and <tt>jq_Array</tt>, respectively; both these are
+subclasses of <tt>jq_Reference</tt>.
+<p>See Chapter <a href="scope.html">*</a> for how Chord determines which
+classes may be loaded and which methods may be called.
+<p>The quadcode representation of each type is a unique object of the
+appropriate subclass
+of <a href="http://chord.stanford.edu/javadoc/joeq/Class/jq_Type.html"><tt>joeq.Class.jq_Type</tt></a> in the following
+hierarchy:
+<pre>
+                    jq_Type
+                       |
+      ------------------------------------
+      |                                  |
+jq_Primitive                       jq_Reference
+                                         |
+                          -------------------------------
+                          |                             |
+                      jq_Class                       jq_Array
+</pre>
+
+<h3><a name="id3">Class Members</a></h3>
+
+<p>Each primitive type (e.g., boolean, int, etc.) is represented by a
+unique <tt>jq_Primtive</tt> object.  Each class and each interface type is
+represented by a unique <tt>jq_Class</tt> object.  Each array type is
+represented by a unique <tt>jq_Array</tt> object.
+<p>Members (i.e., fields and methods) of the class/interface represented
+by an object of
+class <a href="http://chord.stanford.edu/javadoc/joeq/Class/jq_Class.html"><tt>joeq.Class.jq_Class</tt></a> can be
+accessed using the following API provided by that class.
+<table border=1 cellpadding=10><tbody><tr><td colspan="1" align="LEFT">
+
+<code>String getName()</code> </td><td colspan="1" align="LEFT"> Fully-qualified name of the class, e.g., "<tt>java.lang.String[]</tt>". </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>jq_InstanceField[] getDeclaredInstanceFields()</code> </td><td colspan="1" align="LEFT"> All instance fields declared in the class. </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>jq_StaticField[] getDeclaredStaticFields()</code> </td><td colspan="1" align="LEFT"> All static fields declared in the class. </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>jq_InstanceMethod[] getDeclaredInstanceMethods()</code> </td><td colspan="1" align="LEFT"> All instance methods declared in the class. </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>jq_StaticMethod[] getDeclaredStaticMethods()</code> </td><td colspan="1" align="LEFT"> All static methods declared in the class. </td></tr></tbody></table>
+
+<p>Chord uses format <tt>mName:mDesc@cName</tt>, described in
+class <a href="http://chord.stanford.edu/javadoc/chord/program/MethodSign.html"><tt>chord.program.MethodSign</tt></a>,
+to uniquely identify each field and each method in the input Java
+program, where
+<tt>mName</tt> denotes the name of the field/method,
+<tt>mDesc</tt> denotes the descriptor of the field/method (see below),
+and <tt>cName</tt> denotes the fully-qualified name of the class
+declaring the field/method.
+For instance, "<tt>main:[Ljava/lang/String;@test.HelloWorld</tt>"
+uniquely identifies the main method in the example above.
+We next review field descriptors and method descriptors from the Java
+bytecode specification.
+<p>A field descriptor represents the type of a local variable or a
+(static or instance) field.  It is a series of characters generated by
+the grammar:
+<pre>
+FieldDescriptor : FieldType
+      FieldType : BaseType | ObjectType | ArrayType
+       BaseType : B | C | D | F | I | J | S | Z
+     ObjectType : L &lt;classname&gt; ;
+      ArrayType : [ ComponentType
+  ComponentType : FieldType
+</pre>
+<p>The characters of <tt>BaseType</tt>, the `<tt>L</tt>' and `<tt>;</tt>'
+of <tt>ObjectType</tt>, and the `<tt>[</tt>' of
+<tt>ArrayType</tt> are all ASCII characters.
+The <tt>&lt;classname&gt;</tt> represents a fully qualified class or interface
+name.  The interpretation of the field types is as shown in the below
+table:
+<table border=1 cellpadding=10><tbody><tr><td colspan="1" align="LEFT">
+
+BaseType Character	</td><td colspan="1" align="LEFT"> Type	</td><td colspan="1" align="LEFT"> Interpretation </td></tr>
+<tr><td colspan="1" align="LEFT">
+<tt>B</tt> </td><td colspan="1" align="LEFT">byte</td><td colspan="1" align="LEFT"> signed byte </td></tr>
+<tr><td colspan="1" align="LEFT">
+<tt>C</tt> </td><td colspan="1" align="LEFT">char</td><td colspan="1" align="LEFT"> Unicode character </td></tr>
+<tr><td colspan="1" align="LEFT">
+<tt>D</tt> </td><td colspan="1" align="LEFT">double</td><td colspan="1" align="LEFT"> double-precision floating-point value </td></tr>
+<tr><td colspan="1" align="LEFT">
+<tt>F</tt> </td><td colspan="1" align="LEFT">float</td><td colspan="1" align="LEFT"> single-precision floating-point value </td></tr>
+<tr><td colspan="1" align="LEFT">
+<tt>I</tt> </td><td colspan="1" align="LEFT">int</td><td colspan="1" align="LEFT"> integer </td></tr>
+<tr><td colspan="1" align="LEFT">
+<tt>J</tt> </td><td colspan="1" align="LEFT">long</td><td colspan="1" align="LEFT"> long integer </td></tr>
+<tr><td colspan="1" align="LEFT">
+<tt>L&lt;classname&gt;;</tt>	</td><td colspan="1" align="LEFT">reference</td><td colspan="1" align="LEFT"> an instance of class <tt>&lt;classname&gt;</tt> </td></tr>
+<tr><td colspan="1" align="LEFT">
+<tt>S</tt>	</td><td colspan="1" align="LEFT">short</td><td colspan="1" align="LEFT"> signed short </td></tr>
+<tr><td colspan="1" align="LEFT">
+<tt>Z</tt>	</td><td colspan="1" align="LEFT">boolean</td><td colspan="1" align="LEFT"> true or false </td></tr>
+<tr><td colspan="1" align="LEFT">
+<tt>[</tt>	</td><td colspan="1" align="LEFT">reference</td><td colspan="1" align="LEFT"> one array dimension </td></tr></tbody></table>
+
+<p>For example, the descriptor of type <tt>int</tt>
+ is simply <tt>I</tt>.  The descriptor of an instance variable of
+ type <tt>Object</tt> is "<tt>Ljava/lang/Object;</tt>".  Note that the
+ internal form of the fully qualified name for class <tt>Object</tt> is
+ used. The descriptor of a multidimensional double array of type
+ "<tt>double[][][]</tt>" is "<tt>[[[D</tt>".
+<p>A method descriptor represents the types of the arguments and 
+return result of a method:
+<pre>
+   MethodDescriptor : ( ParameterDescriptor* ) ReturnDescriptor
+ParameterDescriptor : FieldType
+   ReturnDescriptor : FieldType | V
+</pre>
+<p>A parameter descriptor represents the type of an argument of a method.
+A return descriptor represents the type of the return result of a
+method.  The character `<tt>V</tt>' indicates that the method returns no
+value (its return type is void).
+<p>The method descriptor is the same whether it is a static or an instance
+method.  Although an instance method is passed <tt>this</tt>, a reference
+to the current class instance, in addition to its intended arguments,
+that fact is not reflected in the method descriptor.
+<p>For example, the method descriptor
+for the method "<tt>Object foo(int i, double d, Thread t)</tt>" is
+"<tt>(IDLjava/lang/Thread;)Ljava/lang/Object;</tt>".  Note that
+internal forms of the fully qualified names of <tt>Thread</tt> and
+<tt>Object</tt> are used in the method descriptor.
+
+<h3><a name="sec:methods">Methods</a></h3>
+
+<p>The quadcode representation of each method is a unique object of
+class <a href="http://chord.stanford.edu/javadoc/joeq/Class/jq_Method.html"><tt>joeq.Class.jq_Method</tt></a>.  Components of the method,
+most notably its control-flow graph,
+can be accessed using the following API provided
+by that class.
+<table border=1 cellpadding=10><tbody><tr><td colspan="1" align="LEFT">
+
+<code>String getName()</code> </td><td colspan="1" align="LEFT"> Name of the method. </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>String getDesc().toString()</code> </td><td colspan="1" align="LEFT"> Descriptor of the method, e.g., "<tt>(Ljava/lang/String;)V</tt>". </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>jq_Class getDeclaringClass()</code> </td><td colspan="1" align="LEFT"> Declaring class of the method. </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>ControlFlowGraph getCFG()</code> </td><td colspan="1" align="LEFT"> Control-flow graph of the method.* </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>int getLineNumber(int bci)</code> </td><td colspan="1" align="LEFT"> Line number of the given bytecode offset (-1 if not found). </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>Quad getQuad(int bci)</code> </td><td colspan="1" align="LEFT"> First quad at the given bytecode
+offset (null if not found). </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>Quad getQuad(int bci, Class kind)</code> </td><td colspan="1" align="LEFT"> First quad of the given
+kind at the given bytecode offset (null if not found). </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>Quad getQuad(int bci, Class[] kind)</code> </td><td colspan="1" align="LEFT"> First quad of any
+given kind at the given bytecode offset (null if not found). </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>String toString()</code> </td><td colspan="1" align="LEFT"> Unique identifier of the method in format <tt>mName:mDesc@cName</tt>. </td></tr></tbody></table>
+
+<p>* The control-flow graph must not be asked if the method is abstract (which can be determined by calling instance method <tt>isAbstract()</tt> of <tt>jq_Method</tt>).
+
+<h3><a name="sec:cfgs">Control-Flow Graphs</a></h3>
+
+<p>The control-flow graph (CFG) of each method consists of a set of registers,
+called the register factory, and a directed graph whose nodes are basic blocks and
+whose edges denote flow of control between basic blocks.
+<p>The CFG of each method is a unique object of
+class <a href="http://chord.stanford.edu/javadoc/joeq/Compiler/Quad/ControlFlowGraph.html"><tt>joeq.Compiler.Quad.ControlFlowGraph</tt></a>.
+Components of the CFG can be accessed using the following API provided
+by that class.
+<table border=1 cellpadding=10><tbody><tr><td colspan="1" align="LEFT">
+
+<code>getRegisterFactory()</code> </td><td colspan="1" align="LEFT"> Set of all local variables. </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>EntryOrExitBasicBlock entry()</code> </td><td colspan="1" align="LEFT"> Unique entry basic block. </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>EntryOrExitBasicBlock exit()</code> </td><td colspan="1" align="LEFT"> Unique exit basic block. </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>ListIterator.BasicBlock reversePostOrderIterator()</code> </td><td colspan="1" align="LEFT"> Iterator over all basic blocks in reverse post-order. </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>jq_Method getMethod()</code> </td><td colspan="1" align="LEFT"> Containing method of the CFG. </td></tr></tbody></table>
+
+<p>The register factory contains one register per argument of the method
+(called <i>local variables</i>) and one register per temporary 
+in the method body (called <i>stack variables</i>).
+Temporaries include those declared by programmers as well as those
+generated by Joeq.  The reason Joeq can generate temporaries is that the quadcode
+representation, which is register-based, is constructed from Java
+bytecode, which is stack-based; moreover, Joeq does the Static Single
+Assignment (SSA) transformation by default, which introduces
+temporaries to ensure that there is at most one static assignment to
+any variable.  Registers corresponding to local variables are named <tt>R0</tt>, <tt>R1</tt>, ..., <tt>Rn</tt>,
+while those corresponding to stack variables are named <tt>Tn+1</tt>, <tt>Tn+2</tt>, ..., <tt>Tm</tt>.
+<p>For instance, the register factory of the main method in the example above 
+has 3 registers: <tt>R0</tt> denoting the <tt>args</tt> argument of the method
+and <tt>T1</tt> and <tt>T2</tt> denoting temporaries generated by Joeq.
+<p>Each register factory is a unique object
+of class <a href="http://chord.stanford.edu/javadoc/joeq/Compiler/Quad/RegisterFactory.html"><tt>joeq.Compiler.Quad.RegisterFactory</tt></a>.
+<p>Besides the register factory, a CFG has a directed graph whose nodes are basic blocks and whose edges
+denote flow of control between basic blocks.
+Each basic block contains a straight-line sequence of zero or more primitive statements called quads
+(Section <a href="#sec:quads">*</a>).  Each CFG is guaranteed to contain at least
+two basic blocks: a unique entry basic block with no incoming edges
+and a unique exit block with no outgoing edges.  The entry and exit
+basic blocks do not contain any quads.
+<p>Each basic block is a unique object of
+class <a href="http://chord.stanford.edu/javadoc/joeq/Compiler/Quad/BasicBlock.html"><tt>joeq.Compiler.Quad.BasicBlock</tt></a>
+(the entry and exit basic blocks are instances of a
+subclass <a href="http://chord.stanford.edu/javadoc/joeq/Compiler/Quad/EntryOrExitBsaicBlock.html"><tt>joeq.Compiler.Quad.EntryOrExitBasicBlock</tt></a>).
+Components of the basic block can be accessed using the following API
+provided by that class.
+<table border=1 cellpadding=10><tbody><tr><td colspan="1" align="LEFT">
+
+<code>int size()</code> </td><td colspan="1" align="LEFT"> Number of quads contained in the basic block. </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>Quad getQuad(int index)</code> </td><td colspan="1" align="LEFT"> Quad at the given 0-based index. </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>List.BasicBlock getPredecessors()</code> </td><td colspan="1" align="LEFT"> List of immediate predecessor basic blocks. </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>List.BasicBlock getSuccessors()</code> </td><td colspan="1" align="LEFT"> List of immediate successor basic blocks. </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>jq_Method getMethod()</code> </td><td colspan="1" align="LEFT"> Containing method of the basic block. </td></tr></tbody></table>
+
+
+<h3><a name="sec:quads">Quads</a></h3>
+
+<p>Chord uses format <tt>offset!mName:mDesc@cName</tt>, described in
+class <a href="http://chord.stanford.edu/javadoc/chord/program/MethodElem.html"><tt>chord.program.MethodElem</tt></a>,
+to uniquely identify each bytecode instruction in the input Java
+program, where <tt>offset</tt> is the (0-based) bytecode offset of the
+instruction in its containing method, <tt>mName</tt> is the name of the
+method, <tt>mDesc</tt> is the descriptor of the method, and <tt>cName</tt>
+is the fully-qualified name of the class declaring the method.  For
+instance, "<tt>8!main:[Ljava/lang/String;@test.HelloWorld</tt>"
+uniquely identifies the return instruction in the main method
+in the example above.
+<p>The quadcode representation is register-based, as opposed to Java
+bytecode that is used to construct it, which is stack-based.  As a
+result, it uses <i>quads</i> to represent bytecode instructions.  A
+quad is a primitive statement that consists of an operator and upto
+four operands.  There is no one-to-one correspondence between bytecode
+instructions and quads: certain bytecode instructions generate a
+sequence of more than one quads while others do not generate any quad.
+The API of class <tt>jq_Method</tt> provides various <tt>getQuad(...)</tt>
+methods to access the quad(s)
+corresponding to a bytecode instruction (see Section <a href="#sec:methods">*</a>).
+<p>Each quad is a unique object of
+class <a href="http://chord.stanford.edu/javadoc/joeq/Compiler/Quad/Quad.html"><tt>joeq.Compiler.Quad.Quad</tt></a>.
+Components of the quad can be accessed using the following API
+provided by that class.
+<table border=1 cellpadding=10><tbody><tr><td colspan="1" align="LEFT">
+
+<code>Operator getOperator()</code> </td><td colspan="1" align="LEFT"> Kind of the quad. </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>int getBCI()</code> </td><td colspan="1" align="LEFT"> Bytecode offset of the quad in its containing
+method. </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>String toByteLocStr()</code> </td><td colspan="1" align="LEFT"> Unique identifier of the quad in
+format <tt>offset!mName:mDesc@cName</tt>. </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>String toJavaLocStr()</code> </td><td colspan="1" align="LEFT"> Location of the quad in
+format <tt>fileName:lineNum</tt> in Java source code. </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>String toLocStr()</code> </td><td colspan="1" align="LEFT"> Location of the quad in both Java bytecode and source code. </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>String toVerboseStr()</code> </td><td colspan="1" align="LEFT"> Verbose description of the quad (its location plus contents). </td></tr>
+<tr><td colspan="1" align="LEFT">
+<code>jq_Method getMethod()</code> </td><td colspan="1" align="LEFT"> Containing method of the quad. </td></tr></tbody></table>
+
+<p>The kind of each quad is determined by its operator which is a unique object of
+the appropriate subclass
+of <a href="http://chord.stanford.edu/javadoc/joeq/Compiler/Quad/Operator.html"><tt>joeq.Compiler.Quad.Operator</tt></a>
+in the following hierarchy:
+<pre>
+Operator
+    |
+    |--- Move
+    |--- Phi
+    |--- Unary
+    |--- Binary
+    |--- New
+    |--- NewArray
+    |--- MultiNewArray
+    |--- Getstatic
+    |--- Putstatic
+    |--- ALoad
+    |--- AStore
+    |--- Getfield
+    |--- Putfield
+    |--- CheckCast
+    |--- InstanceOf
+    |--- ALength
+    |--- Return
+    |
+    |--- Branch
+    |       |
+    |       |--- IntIfCmp
+    |       |--- Goto
+    |       |--- Jsr
+    |       |--- Ret
+    |       |--- LookupSwitch
+    |       |--- TableSwitch
+    |
+    |--- Invoke
+    |       |
+    |       |--- InvokeVirtual
+    |       |--- InvokeStatic
+    |       |--- InvokeInterface
+    |
+    |--- Monitor
+            |
+            |--- MONITORENTER
+            |--- MONITOREXIT
+</pre>
+<p>The number and kinds of operands of each quad depends upon the kind of
+the operator.  Each of the above subclasses of <tt>Operator</tt>
+provides an API to access the operands of the quad.  For instance,
+the components of a <tt>Getfield</tt> quad <tt>q</tt> of the form "l = b.f" can be accessed as follows:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+Operand lo = Getfield.getSrc(q);
+Operand bo = Getfield.getBase(q);
+if (lo instanceof RegisterOperand &amp;&amp; bo instanceof RegisterOperand) {
+    Register l = ((RegisterOperand) lo).getRegister();
+    Register b = ((RegisterOperand) bo).getRegister();
+    jq_Field f = Getfield.getField(q).getField();
+    ...
+}
+</pre>
+</td></tr></tbody></table>
+
+
+<h3><a name="sec:traversing">Traversing Quadcode</a></h3>
+
+<p>A common way to traverse all quads in the input Java program is as follows:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+
+import chord.program.Program;
+import joeq.Compiler.Quad.QuadVisitor;
+import joeq.Class.jq_Method;
+import joeq.Compiler.Quad.ControlFlowGraph;
+import joeq.Util.Templates.ListIterator;
+import joeq.Compiler.Quad.BasicBlock;
+import joeq.Compiler.Quad.Quad;
+
+QuadVisitor qv = new QuadVisitor.EmptyVisitor() {
+    public void visitMove(Quad q) { ... }
+    public void visitPhi(Quad q) { ... }
+    public void visitUnary(Quad q) { ... }
+    ...
+};
+Program program = Program.g();
+for (jq_Method m : program.getMethods()) {
+    if (!m.isAbstract()) {
+        ControlFlowGraph cfg = m.getCFG();
+        ListIterator.BasicBlock it = cfg.reversePostOrderIterator();
+        while (it.hasNext()) {
+            BasicBlock b = it.nextBasicBlock();
+            for (int i = 0; i &lt; b.size(); i++) {
+                Quad q = b.getQuad(i);
+                q.accept(qv);
+            }
+        }
+    }
+}
+</pre>
+</td></tr></tbody></table>
+
+
+<hr /><address>mhn@cs.stanford.edu</address><br />
+<table width="100%" cellpadding=0 cellspacing=2><tr>
+    <td bgcolor="#99ccff"><a href="project.html"><img border="0" alt="A Chord Project: Tasks, Targets, and Dependencies" src="next.png"></a></td><td bgcolor="#99ccff"><a href="developer_guide.html"><img border="0" alt="Guide for Developers" src="up.png"></a></td><td bgcolor="#99ccff"><a href="arch.html"><img border="0" alt="Architecture of Chord" src="previous.png"></a></td><td align="center" bgcolor="#99ccff" width="100%"><b>Java Program Representation</b></td></tr></table></body></html>

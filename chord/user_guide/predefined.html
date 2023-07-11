@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<!-- XML file produced from file: user_guide.tex
+     using Hyperlatex v 2.7 (c) Otfried Cheong
+     on Emacs 22.2.1, Sat Apr 16 21:41:54 2011 -->
+<head>
+<title>Chord -- Predefined Analyses</title>
+
+<style type="text/css">
+.maketitle { align : center }
+div.abstract { margin-left: 20%; margin-right: 10%; }
+h3.abstract  { align : center }
+div.verse, div.quote, div.quotation {
+  margin-left : 10%; 
+  margin-right : 10%;
+}
+</style>
+
+
+</head>
+<body>
+<table width="100%" cellpadding=0 cellspacing=2><tr>
+    <td bgcolor="#99ccff"><img alt="" src="blank.png"></td><td bgcolor="#99ccff"><a href="enduser_guide.html"><img border="0" alt="Guide for End-Users" src="up.png"></a></td><td bgcolor="#99ccff"><a href="scope.html"><img border="0" alt="Analysis Scope Construction" src="previous.png"></a></td><td align="center" bgcolor="#99ccff" width="100%"><b>Predefined Analyses</b></td></tr></table>
+<h2>Predefined Analyses</h2>
+
+<p>Chord provides many standard analyses.
+This chapter first explains how to run any such analysis and then provides
+descriptions of various predefined analyses.
+
+<h3><a name="id1">Running an Analysis</a></h3>
+
+<p>Each analysis in Chord is written modularly, independent of other analyses,
+along with lightweight annotations specifying the inputs and outputs of the
+analysis.  Chord's runtime automatically computes dependencies between analyses
+(e.g., determines which analysis produces as output a result that is needed as
+input by another analysis).  Before running a desired analysis, Chord
+recursively runs other analyses until the inputs to the desired analysis have
+been computed; it finally runs the desired analysis to produce the outputs of
+that analysis.
+<p>Each analysis in Chord has a unique name that can be used to run the
+analysis from the command-line.  You can obtain the names of all analyses
+predefined in Chord by running the following command:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+ant -Dchord.out.dir=&lt;OUT_DIR&gt; -Dchord.print.project=true run
+</pre>
+</td></tr></tbody></table>
+
+<p>This command produces files <tt>targets_sortby_name.html</tt>, <tt>targets_sortby_kind.html</tt>,
+and <tt>targets_sortby_producers.html</tt> in directory <tt>&lt;OUT_DIR&gt;</tt>.  These
+files publish the names and descriptions of all analyses that are predefined in
+Chord, along with the inputs and outputs of each analysis.
+<p>The following command runs the analysis
+named <tt>&lt;ANALYSIS_NAME&gt;</tt> on the program specified by directory <tt>&lt;WORK_DIR&gt;</tt>
+(see Chapter <a href="setup.html">*</a> for how to setup a program):
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+ant -Dchord.work.dir=&lt;WORK_DIR&gt; -Dchord.run.analyses=&lt;ANALYSIS_NAME&gt; run
+</pre>
+</td></tr></tbody></table>
+
+<p>For instance, the following command runs a basic may-alias and call-graph
+analysis (called 0CFA) provided in Chord:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+ant -Dchord.work.dir=&lt;WORK_DIR&gt; -Dchord.run.analyses=cipa-0cfa-dlog run
+</pre>
+</td></tr></tbody></table>
+
+<p>This instructs Chord to run the analysis named <tt>cipa-0cfa-dlog</tt>,
+which is defined in file <tt>main/src/chord/analyses/alias/cipa_0cfa.dlog</tt>.
+<p>The output of the above command is of the form:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<font size="-1"><pre>
+Buildfile: build.xml
+
+run:
+     [java] Chord run initiated at: Mar 13, 2011 10:31:08 PM
+     [java] ENTER: cipa-0cfa-dlog
+     [java] ENTER: T
+     [java] ENTER: RTA
+     [java] Iteration: 0
+     [java] Iteration: 1
+     [java] Iteration: 2
+     [java] LEAVE: RTA
+     [java] SAVING dom T size: 1386
+     [java] LEAVE: T
+     [java] ENTER: F
+     [java] SAVING dom F size: 4120
+     [java] LEAVE: F
+     ...
+     [java] ENTER: MputStatFldInst
+     [java] SAVING rel MputStatFldInst size: 739
+     [java] LEAVE: MputStatFldInst
+     [java] ENTER: statIM
+     [java] SAVING rel statIM size: 3359
+     [java] LEAVE: statIM
+     [java] Starting command: 'java ... chord_analyses_alias_cipa_0cfa.dlog'
+     [java] Relation VH: 541 nodes, 449.0 elements (V0,H0)
+     [java] Relation FH: 137 nodes, 8.0 elements (H0,F0)
+     [java] Relation HFH: 199 nodes, 35.0 elements (H0,F0,H1)
+     [java] Relation IM: 590 nodes, 69.0 elements (I0,M0)
+     [java] Finished command: 'java ... chord_analyses_alias_cipa_0cfa.dlog'
+     [java] LEAVE: cipa-0cfa-dlog
+     [java] Chord run completed at: Mar 13, 2011 10:31:36 PM
+     [java] Total time: 00:00:27:671 hh:mm:ss:ms
+
+BUILD SUCCESSFUL
+Total time: 28 seconds
+</pre>
+</font>
+</td></tr></tbody></table>
+
+<p>The 0CFA analysis consumes and produces multiple <i>program relations</i>.  The
+consumed program relations include <tt>MputStatFldInst</tt> and <tt>statIM</tt>,
+each of which is produced by a separate analysis with the corresponding name.
+The produced program relations include <tt>VH</tt>, <tt>FH</tt>, <tt>HFH</tt>, and
+<tt>IM</tt>.  We next briefly discuss these relations.
+<p>The program relations consumed by the 0CFA analysis contain basic program facts.
+For instance, <tt>MputStatFldInst</tt> is a relation containing each tuple
+(<i>m</i>,<i>f</i>,<i>v</i>) such that method <i>m</i> in the input Java program contains a
+putstatic instruction of the form "<i>f</i> = <i>v</i>", while <tt>statIM</tt> is a
+relation containing each tuple (<i>i</i>,<i>m</i>) such that <i>m</i> is the target method of
+invokestatic instruction <i>i</i>.
+<p>The program relations produced by the 0CFA analysis represent points-to
+information and the call graph of the input Java program as computed by the
+analysis.  Specifically, relations <tt>VH</tt>, <tt>FH</tt>, and <tt>HFH</tt>
+represent points-to information for local variables, static fields, and instance
+fields, respectively, while relation <tt>IM</tt> represents the call graph,
+namely, it contain each tuple (<i>i</i>,<i>m</i>) such that <i>m</i> is a possible target
+method of call site <i>i</i>.
+<p>Metavariables <i>m</i>, <i>f</i>, <i>i</i>, and <i>v</i> above range over values in so-called
+<i>program domains</i> <tt>M</tt>, <tt>F</tt>, <tt>I</tt>, and <tt>V</tt>, respectively.
+A program domain is a set of values of a fixed kind in the input Java
+program.  For instance, <tt>M</tt> is the domain representing the set of all
+methods in the input Java program, <tt>F</tt> is the domain representing the set
+of all fields, <tt>I</tt> is the domain representing the set of all call sites in
+methods in <tt>M</tt>, and <tt>V</tt> is the domain representing the set of all
+local variables of reference type in methods in <tt>M</tt>.  Each of these domains
+is produced by a separate analysis with the corresponding name.  Notice
+that the analyses producing these domains run upfront because these domains are
+consumed by the analyses that produce relations such as <tt>MputStatFldInst</tt>
+and <tt>statIM</tt>, which in turn are consumed by the desired 0CFA analysis.
+<p>During execution, Chord dumps intermediate and final results to files in the
+directory specified by property <tt>chord.out.dir</tt>, whose default value is
+<tt>[chord.work.dir]/chord_output/</tt> and typically does not need to be changed
+by users.  For the above example, this directory is
+<tt>&lt;WORK_DIR&gt;/chord_output/</tt>.
+<p>The verbosity of Chord's output is controlled by property
+<tt>chord.verbose</tt>, whose default value is 1.  At verbosity level 0, the above
+command produces less voluminous output of the form:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<font size="-1"><pre>
+Buildfile: build.xml
+
+run:
+     [java] Chord run initiated at: Mar 13, 2011 10:35:01 PM
+     [java] Chord run completed at: Mar 13, 2011 10:35:28 PM
+     [java] Total time: 00:00:26:297 hh:mm:ss:ms
+
+BUILD SUCCESSFUL
+Total time: 26 seconds
+</pre>
+</font>
+</td></tr></tbody></table>
+
+
+<h3><a name="id2">Points-to and Call-Graph Analyses</a></h3>
+<p>Chord offers several choices for computing points-to and call-graph information
+of Java programs.  In each of these choices, the points-to and call-graph
+information is computed simultaneously (called "on-the-fly call-graph
+construction" in the literature in contrast to "ahead-of-time call-graph
+construction" in which the call graph is computed first followed by points-to
+information).  On-the-fly approaches are more precise because, in a dynamically
+dispatching language like Java, as more points-to facts are discovered, more
+(dynamically dispatched) methods are deemed reachable, thereby growing the call
+graph; the code in these newly added methods in turn results in more points-to
+facts.
+<p>Flow-insensitive analysis computes a single abstract heap whereas flow-sensitive
+analysis computes per-program-point abstract heaps.  Context-insensitive
+analysis analyzes each method at most once (i.e. in a single abstract context),
+whereas context-sensitive analyses potentially analyze each method multiple
+times, in different abstract contexts.  Thus, flow- and context-sensitive
+analyses are more precise but less scalable than flow- and context-insensitive
+analyses, respectively.
+<p>Flow-sensitive analysis does not offer much precision over flow-insensitive
+analysis in practice, especially in the absence of strong updates and in the
+presence of SSA (Static Single Assignment form), a program representation that
+renders a flow-insensitive analysis almost as precise as a flow-sensitive
+analysis.  Since analyses in Chord currently perform only weak updates, and
+since they all operate on an SSA form of the input Java program by default, the
+rest of this section focuses only on flow-insensitive analysis, which is the
+predominant kind of points-to/call-graph analysis in Chord.
+<p>We describe context-insensitive analysis first because understanding the
+concepts behind it will help understand the more sophisticated context-sensitive
+analyses.  We first recall some relevant program domains:
+<ul><li>M is the domain of all methods.
+<li>I is the domain of all method call sites.
+<li>F is the domain of all (instance and static) fields.
+<li>V is the domain of all local variables of reference type.
+<li>H is the domain of all object allocation sites.
+</ul>
+
+<h4><a name="id3">Context-Insensitive Analysis</a></h4>
+<p>The context-insensitive points-to/call-graph analysis treats each object
+allocation site as a separate abstract memory location; in other words, it can
+distinguish objects created at different sites but not those created at the same
+site.  Additionally, it is field-sensitive, in that it distinguishes between
+different instance fields of the same object, but array-insensitive, in that it
+cannot distinguish between different elements of the same array; all array
+elements are modeled using a distinguished hypothetical instance field (that has
+index 0 in domain F).
+<p>The following command can be used to run this analysis on the program specified
+by directory <tt>&lt;WORK_DIR&gt;</tt> (see Chapter <a href="setup.html">*</a> for how to setup a
+program):
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+ant -Dchord.work.dir=&lt;WORK_DIR&gt; -Dchord.run.analyses=cipa-0cfa-dlog run
+</pre>
+</td></tr></tbody></table>
+
+<p>This analysis outputs the following relations:
+<ul><li><i>Call-graph information:</i>
+<ul><li>rootM subset M contains the set of entry methods that may be reachable; this
+includes the program's main method as well as each static initializer method
+that may be reachable from the main method.
+<li>reachableM subset M contains the set of methods that may be reachable from the
+program's main method.
+<li>IM subset (I <i>&#215;</i> M) contains tuples <tt>(i,m)</tt> such that call site
+<tt>i</tt> may call method <tt>m</tt>.
+</ul>
+<li><i>Points-to information:</i>
+<ul><li>FH subset (F <i>&#215;</i> H) contains tuples <tt>(f,h)</tt> such that static field
+(i.e.  global variable) <tt>f</tt> may point to an object allocated at site
+<tt>h</tt>.
+<li>VH subset (V <i>&#215;</i> H) contains tuples <tt>(v,h)</tt> such that local variable
+<tt>v</tt> may point to an object allocated at site <tt>h</tt>.
+<li>HFH subset (H <i>&#215;</i> F <i>&#215;</i> H) contains tuples <tt>(h1,f,h2)</tt> such
+that instance field <tt>f</tt> of some object allocated at site <tt>h1</tt> may
+point to some object allocated at site <tt>h2</tt>.
+</ul>
+</ul>
+
+<h4><a name="id4">Context-Sensitive Analysis</a></h4>
+<p>In a context-sensitive analysis, there is no longer just one abstract memory
+location per object allocation site.  Rather, the set of objects a reference can
+point to depends on the <i>context</i> in which the method containing the
+reference is called.  Whereas a context-insensitive analysis talks about the
+domain of methods (M) and the domain of allocation sites (H), a
+context-sensitive analysis talks about the domain of abstract contexts, labeled
+C.  Elements of domain C contain both abstract calling contexts and abstract
+objects. (These are merged for reasons described below.)
+<p>Chord has several context-sensitive analyses, but they all expose the same
+relations, which are described below:
+<ul><li><i>Context information:</i>
+<ul><li>C is the domain of all abstract calling contexts and abstract objects.  Each
+element in this domain is a sequence of zero or more sites, where each site can
+be a call site or an object allocation site.  A sequence may have mixed call
+sites and object allocation sites.  The most significant site (i.e. the first
+site) in each sequence is called the head; the remaining sub-sequence is called
+the tail.  The below three relations relate a sequence with its head and tail.
+<li>CC subset (C <i>&#215;</i> C) contains tuples <tt>(c1,c2)</tt> such that context
+<tt>c2</tt> is the tail of context <tt>c1</tt>.
+<li>CH subset (C <i>&#215;</i> H) contains tuples <tt>(c,h)</tt> such that object
+allocation site <tt>h</tt> is the head of context <tt>c</tt>.
+<li>CI subset (C <i>&#215;</i> I) contains tuples <tt>(c,i)</tt> such that call site
+<tt>i</tt> is the head of context <tt>c</tt>.
+</ul>
+<li><i>Call-graph information:</i>
+<ul><li>rootCM subset (C <i>&#215;</i> M) contains tuples <tt>(c,m)</tt> such that method
+<tt>m</tt> is an entry method in context <tt>c</tt>.
+<li>reachableCM subset (C <i>&#215;</i> M) contains tuples <tt>(c,m)</tt> such that
+method <tt>m</tt> may be reachable in context <tt>c</tt>.
+<li>CICM subset (C <i>&#215;</i> I <i>&#215;</i> C <i>&#215;</i> M) contains tuples
+<tt>(c1,i,c2,m)</tt> such that call site <tt>i</tt> in context <tt>c1</tt> may
+call method <tt>m2</tt> in context <tt>c2</tt>.
+</ul>
+<li><i>Points-to information:</i>
+<ul><li>FC subset (F <i>&#215;</i> C) contains tuples <tt>(f,o)</tt> such that static field
+(i.e. global variable) <tt>f</tt> may point to object <tt>o</tt>.
+<li>CVC subset (C <i>&#215;</i> V <i>&#215;</i> C) contains tuples <tt>(c,v,o)</tt> such that
+local variable <tt>v</tt> may point to object <tt>o</tt> in context <tt>c</tt>
+of that variable's declaring method.  Note that both <tt>o</tt> and <tt>c</tt>
+are elements of domain C.
+<li>CFC subset (C <i>&#215;</i> F <i>&#215;</i> C) contains tuples <tt>(o1,f,o2)</tt> such
+that instance field <tt>f</tt> of object <tt>o1</tt> may point to object
+<tt>o2</tt>.  </ul>
+</ul>
+<p><b>Under Construction: explain object-sensitive vs context-sensitive, plus how
+to invoke.</b>
+
+<h3><a name="id5">Static Datarace Analysis</a></h3>
+<p>The following command can be used to run Chord's static datarace analysis on the
+program specified by directory <tt>&lt;WORK_DIR&gt;</tt> (see Chapter <a href="setup.html">*</a>
+for how to setup a program):
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+ant -Dchord.work.dir=&lt;WORK_DIR&gt; -Dchord.run.analyses=datarace-java run
+</pre>
+</td></tr></tbody></table>
+
+<p>Directory <tt>examples/datarace_test/</tt> provides a toy Java program on which to
+run the datarace analysis.  First run <tt>ant</tt> in that directory (in order to
+compile the program's <tt>.java</tt> files to <tt>.class</tt> files) and then run the
+above command with <tt>&lt;WORK_DIR&gt;</tt> replaced by <tt>examples/datarace_test/</tt>.
+Upon successful completion, the following files should be produced in directory
+<tt>examples/datarace_test/chord_output/</tt>:
+<ul><li>File <tt>dataraces_by_fld.html</tt>, listing all dataraces grouped by the field on
+which they occur; all dataraces on the same instance field or the same static
+field are listed in the same group, and so are all dataraces on array elements.
+<li>File <tt>dataraces_by_obj.html</tt>, listing all dataraces grouped by the abstract
+object on whose field they occur; dataraces on all static fields are listed in
+the same group, and so are dataraces on different instance fields of the same
+abstract object.
+</ul>
+
+<h3><a name="id6">Static Deadlock Analysis</a></h3>
+<p>The following command can be used to run Chord's static deadlock analysis on the
+program specified by directory <tt>&lt;WORK_DIR&gt;</tt> (see Chapter <a href="setup.html">*</a>
+for how to setup a program):
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+ant -Dchord.work.dir=&lt;WORK_DIR&gt; -Dchord.run.analyses=deadlock-java run
+</pre>
+</td></tr></tbody></table>
+
+<p>Directory <tt>examples/deadlock_test/</tt> provides a toy Java program on which to
+run the deadlock analysis.  First run <tt>ant</tt> in that directory (in order to
+compile the program's <tt>.java</tt> files to <tt>.class</tt> files) and then run the
+above command with <tt>&lt;WORK_DIR&gt;</tt> replaced by <tt>examples/deadlock_test/</tt>.
+Upon successful completion, the file <tt>deadlocks.html</tt> should be produced in
+directory <tt>examples/deadlock_test/chord_output/</tt>.
+
+<hr /><address>mhn@cs.stanford.edu</address><br />
+<table width="100%" cellpadding=0 cellspacing=2><tr>
+    <td bgcolor="#99ccff"><img alt="" src="blank.png"></td><td bgcolor="#99ccff"><a href="enduser_guide.html"><img border="0" alt="Guide for End-Users" src="up.png"></a></td><td bgcolor="#99ccff"><a href="scope.html"><img border="0" alt="Analysis Scope Construction" src="previous.png"></a></td><td align="center" bgcolor="#99ccff" width="100%"><b>Predefined Analyses</b></td></tr></table></body></html>

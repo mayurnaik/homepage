@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<!-- XML file produced from file: user_guide.tex
+     using Hyperlatex v 2.7 (c) Otfried Cheong
+     on Emacs 22.2.1, Sat Apr 16 21:41:54 2011 -->
+<head>
+<title>Chord -- Chord Properties</title>
+
+<style type="text/css">
+.maketitle { align : center }
+div.abstract { margin-left: 20%; margin-right: 10%; }
+h3.abstract  { align : center }
+div.verse, div.quote, div.quotation {
+  margin-left : 10%; 
+  margin-right : 10%;
+}
+</style>
+
+
+</head>
+<body>
+<table width="100%" cellpadding=0 cellspacing=2><tr>
+    <td bgcolor="#99ccff"><a href="setup.html"><img border="0" alt="Setting up a Java Program for Analysis" src="next.png"></a></td><td bgcolor="#99ccff"><a href="enduser_guide.html"><img border="0" alt="Guide for End-Users" src="up.png"></a></td><td bgcolor="#99ccff"><a href="start.html"><img border="0" alt="Getting Started" src="previous.png"></a></td><td align="center" bgcolor="#99ccff" width="100%"><b>Chord Properties</b></td></tr></table>
+<h2>Chord Properties</h2>
+
+<p>The only way to specify inputs to Chord is by means of system properties.  There
+is no command-line argument processing in Chord and any command-line arguments
+are ignored.  Section <a href="#id1">*</a> explains how to set
+properties and Section <a href="#id2">*</a> explains the meaning of
+properties recognized by Chord.
+Notation <tt>[&lt;...&gt;]</tt> is used in this chapter to denote the value of the property named <tt>&lt;...&gt;</tt>.
+
+<h3><a name="id1">How to Set Properties</a></h3>
+
+<p>A property can be passed to Chord in any of several ways.  The reason for
+providing multiple ways is to provide users with shorthand ways for defining
+properties once and for all for a particular Java program under analysis, or
+even once and for all across all Chord runs.  The following are the different
+ways by which a property can be passed to Chord in decreasing order of
+precedence:
+<ol><li><p><b>How:</b> On the command-line via the "<tt>-D&lt;key&gt;=&lt;val&gt;</tt>" format.
+<p><b>When:</b> Use this option to specify properties specific to the <i>current run</i> of Chord.
+<p>Typical usage of this option is by running the following command:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+ant -D&lt;key1&gt;=&lt;val1&gt; ... -D&lt;keyN&gt;=&lt;valN&gt; run
+</pre>
+</td></tr></tbody></table>
+
+<li><p><b>How:</b> Via a user-defined <i>properties file</i> whose location is specified by property <tt>chord.props.file</tt>.
+<p><b>When:</b> Use this option to specify once and for all properties of the
+Java program to be analyzed (e.g., property <tt>chord.main.class</tt> specifying the
+name of that program's main class).
+Chapter <a href="setup.html">*</a> presents an example properties file 
+that defines the program properties that are most commonly used.  Section <a href="#id3">*</a>
+presents all program properties that are recognized by Chord. 
+<p>The default value of property <tt>chord.props.file</tt> is <tt>[chord.work.dir]/chord.properties</tt>.
+Property <tt>chord.work.dir</tt> specifies the directory in which Chord must run; its default value
+is the current directory.
+<p>There are three ways to use this option of setting properties:
+<p>The first way is to override the default value of property <tt>chord.work.dir</tt> on the command-line.
+This requires naming the above properties file as <tt>chord.properties</tt>, placing it in the
+directory in which Chord will run, denoted <tt>&lt;WORK_DIR&gt;</tt>
+(e.g., this could be the top-level directory of the program to be analyzed),
+and running the following command:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+ant -Dchord.work.dir=&lt;WORK_DIR&gt; run
+</pre>
+</td></tr></tbody></table>
+
+<p>The second way is to override the default value of property <tt>chord.props.file</tt> on the command-line.
+In this case, the properties file can be in any user-desired location, denoted <tt>&lt;PROPS_FILE&gt;</tt>, and Chord
+will run in the current directory:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+ant -Dchord.props.file=&lt;PROPS_FILE&gt; run
+</pre>
+</td></tr></tbody></table>
+
+<p>The third (and most flexible) way is to override the default values of both properties <tt>chord.work.dir</tt>
+and <tt>chord.props.file</tt> on the command-line.
+<li><p><b>How:</b> Via the properties file named <tt>chord.properties</tt> that is already provided in Chord's main directory.
+<p><b>When:</b> Use this option to specify once and for all properties you would
+like to hold in <i>every run</i> of Chord (e.g., property <tt>chord.max.heap</tt>
+specifying the maximum heap memory size to be used by the JVM running Chord).
+</ol>
+
+<h3><a name="id2">Recognized Properties</a></h3>
+
+<p>The following properties are recognized by Chord.
+The separator for list-valued properties can be either a blank space, a comma, a colon, or a semi-colon.
+
+<h4><a name="id3">Java Program Properties</a></h4>
+
+<p>This section describes properties of the Java program to be analyzed, such as
+its main class, the location(s) of its class files and Java source
+files, and command-line arguments to be used when running the program.
+<p><tt>chord.work.dir</tt>
+<div class="quote"><p>
+<b>Type:</b> location <br /><b>Description:</b> Working directory during Chord's execution.  This is
+usually the top-level directory of the input Java program. <br /><b>Default value:</b> current working directory
+</p></div>
+<p><tt>chord.props.file</tt>
+<div class="quote"><p>
+<b>Type:</b> location <br /><b>Description:</b> Properties file loaded by Chord at the
+beginning before doing anything else.  Any of the below properties may
+be defined in this file to avoid defining them on the command line
+(using the "<tt>-D&lt;key&gt;=&lt;val&gt;</tt>" format) every time Chord is run.
+Each relative file/directory name in the value of any property defined
+in this file is treated relative to Chord's working directory (which
+is specified by property <tt>chord.work.dir</tt>). <br /><b>Default value:</b> <tt>[chord.work.dir]/chord.properties</tt>
+</p></div>
+<p><tt>chord.main.class</tt>
+<div class="quote"><p>
+<b>Type:</b> class <br /><b>Description:</b> Fully-qualified name of the main class of the input Java program (e.g., <tt>com.example.Main</tt>).
+</p></div>
+<p><tt>chord.class.path</tt>
+<div class="quote"><p>
+<b>Type:</b> path <br /><b>Description:</b> Classpath of the input Java program.  It does not need to include
+boot classes (i.e., classes in <tt>[sun.boot.class.path]</tt>) or
+standard extensions (i.e., classes in jar files in directory <tt>[java.home]/lib/ext/</tt>). <br /><b>Default value:</b> <tt>""</tt>
+</p></div>
+<p><tt>chord.src.path</tt>
+<div class="quote"><p>
+<b>Type:</b> path <br /><b>Description:</b> Source path of the input Java program. <br /><b>Default value:</b> <tt>""</tt> <br /><b>Note:</b> Chord analyzes only Java bytecode, not Java source code.  This property is used only by the task of converting Java source files into HTML files by analyses that need to present their results at the Java source code level (by calling method <tt>chord.program.Program.g().HTMLizeJavaSrcFiles())</tt>.
+</p></div>
+<p><tt>chord.run.ids</tt>
+<div class="quote"><p>
+<b>Type:</b> string list <br /><b>Description:</b> List of IDs to identify runs of the input Java program. <br /><b>Default value:</b> <tt>0</tt> <br /><b>Note:</b> This property is used only when Chord runs the input Java program, namely, when it is asked to compute the analysis scope dynamically (i.e., when <tt>[chord.scope.kind]=dynamic</tt>) or when it is asked to run a dynamic analysis. 
+</p></div>
+<p><tt>chord.args.&lt;id&gt;</tt>
+<div class="quote"><p>
+<b>Type:</b> string <br /><b>Description:</b> Command-line arguments string to be used for the input Java program in the run having ID <tt>&lt;id&gt;</tt>. <br /><b>Default value:</b> <tt>""</tt> <br /><b>Note:</b> This property is used only when Chord runs the input Java program, namely, when it is asked to compute the analysis scope dynamically (i.e., when <tt>[chord.scope.kind]=dynamic</tt>) or when it is asked to run a dynamic analysis.
+</p></div>
+<p><tt>chord.runtime.jvmargs</tt>
+<div class="quote"><p>
+<b>Type:</b> string <br /><b>Description:</b> Arguments to JVM which runs the input Java program. <br /><b>Default value:</b> <tt>"-ea -Xmx1024m"</tt> <br /><b>Note:</b> This property is used only when Chord runs the input Java program, namely, when it is asked to compute the analysis scope dynamically (i.e., when <tt>[chord.scope.kind]=dynamic</tt>) or when it is asked to run a dynamic analysis. 
+</p></div>
+
+<h4><a name="id4">Analysis Scope Properties</a></h4>
+
+<p>This section describes properties that specify how the analysis scope of the input Java program is computed.
+See Chapter <a href="scope.html">*</a> for more details.
+<p><tt>chord.scope.kind</tt>
+<div class="quote"><p>
+<b>Type:</b> <tt>[dynamic|rta|cha]</tt> <br /><b>Description:</b> Algorithm to compute analysis scope.  The choices are <tt>dynamic</tt> (dynamic analysis), <tt>rta</tt> (Rapid Type Analysis), and <tt>cha</tt> (Class Hierarchy Analysis). <br /><b>Default value:</b> <tt>rta</tt> <br /><b>Note:</b> This property is ignored if property <tt>chord.reuse.scope</tt> is set to <tt>true</tt> and the files specified by properties <tt>chord.methods.file</tt> and <tt>chord.reflect.file</tt> exist. 
+</p></div>
+<p><tt>chord.reflect.kind</tt>
+<div class="quote"><p>
+<b>Type:</b> <tt>[none|dynamic|static|static&#95;cast]</tt> <br /><b>Description:</b> Algorithm to resolve reflection.  The choices are <tt>none</tt> (do not resolve any reflection),
+<tt>dynamic</tt> (run the program and observe how reflection is resolved),
+<tt>static</tt> (resolve reflection statically but without analyzing casts), and
+<tt>static&#95;cast</tt> (resolve reflection statically by analyzing casts). <br /><b>Default value:</b> <tt>none</tt>
+</p></div>
+<p><tt>chord.ch.kind</tt>
+<div class="quote"><p>
+<b>Type:</b> <tt>[static|dynamic]</tt> <br /><b>Description:</b> Algorithm to build the class hierarchy.  If it is <tt>dynamic</tt>, then the input Java program is executed
+and classes not loaded by the JVM while running the program are excluded while building the class hierarchy. <br /><b>Default value:</b> <tt>static</tt> <br /><b>Note:</b> This property is relevant only if <tt>chord.scope.kind</tt> is <tt>cha</tt> since only this
+scope computing algorithm queries the class hierarchy. 
+</p></div>
+<p><tt>chord.ssa</tt>
+<div class="quote"><p>
+<b>Type:</b> bool  <br /><b>Description:</b> Do SSA (Static Single Assignment) transformation of the bodies of all methods deemed reachable by the algorithm used to compute analysis scope. <br /><b>Default value:</b> <tt>true</tt>
+</p></div>
+<p><tt>chord.std.scope.exclude</tt>
+<div class="quote"><p>
+<b>Type:</b> string list <br /><b>Description:</b> Partial list of prefixes of names of classes, typically inside the JDK standard library, whose methods must be treated as no-ops. <br /><b>Default value:</b> <tt>""</tt>
+</p></div>
+<p><tt>chord.ext.scope.exclude</tt>
+<div class="quote"><p>
+<b>Type:</b> string list <br /><b>Description:</b> Partial list of prefixes of names of classes, typically outside the JDK standard library, whose methods must be treated as no-ops. <br /><b>Default value:</b> <tt>""</tt>
+</p></div>
+<p><tt>chord.scope.exclude</tt>
+<div class="quote"><p>
+<b>Type:</b> string list <br /><b>Description:</b> Complete list of prefixes of names of classes whose methods must be treated as no-ops. <br /><b>Default value:</b> <tt>"[chord.std.scope.exclude],[chord.ext.scope.exclude]"</tt>
+</p></div>
+<p><tt>chord.std.check.exclude</tt>
+<div class="quote"><p>
+<b>Type:</b> string list <br /><b>Description:</b> Partial list of prefixes of names of classes, typically inside the JDK standard library, to be excluded by analyses.  Interpretation of this property is analysis-specific. <br /><b>Default value:</b> <tt>"java.,javax.,sun.,com.sun.,com.ibm.,</tt> <tt>org.apache.harmony."</tt>
+</p></div>
+<p><tt>chord.ext.check.exclude</tt>
+<div class="quote"><p>
+<b>Type:</b> string list <br /><b>Description:</b> Partial list of prefixes of names of classes, typically outside the JDK standard library, to be excluded by analyses.  Interpretation of this property is analysis-specific. <br /><b>Default value:</b> <tt>""</tt>
+</p></div>
+<p><tt>chord.check.exclude</tt>
+<div class="quote"><p>
+<b>Type:</b> string list <br /><b>Description:</b> Complete list of prefixes of names of classes to be excluded by analyses.  Interpretation of this property is analysis-specific. <br /><b>Default value:</b> <tt>"[chord.std.check.exclude],[chord.ext.check.exclude]"</tt>
+</p></div>
+
+<h4><a name="id5">Functionality Properties</a></h4>
+
+<p>This section describes properties that dictate what task(s) Chord must perform.
+<p><tt>chord.build.scope</tt>
+<div class="quote"><p>
+<b>Type:</b> bool <br /><b>Description:</b> Compute the analysis scope of the input Java program. <br /><b>Default value:</b> <tt>false</tt> <br /><b>Note:</b> The analysis scope is computed regardless of the value of this property if another task (e.g., an analysis specified via property <tt>chord.run.analyses</tt>) demands it.
+</p></div>
+<p><tt>chord.run.analyses</tt>
+<div class="quote"><p>
+<b>Type:</b> string list  <br /><b>Description:</b> List of names of analyses to be run in order. <br /><b>Default value:</b> <tt>""</tt> <br /><b>Note:</b> If the analysis is written in Java, its name is specified via
+a statement <tt>name="..."</tt> in the <tt>@Chord</tt> annotation of the class defining
+the analysis.  If the analysis is written in Datalog, its name is specified via
+a line "<tt>&#35; name=...</tt>" in the <tt>.dlog</tt> file defining the analysis.
+</p></div>
+<p><tt>chord.print.methods</tt>
+<div class="quote"><p>
+<b>Type:</b> string list  <br /><b>Description:</b> List of methods whose intermediate representation to print to standard output. <br /><b>Default value:</b> <tt>""</tt> <br /><b>Note:</b> Specify each method in format <tt>mname:mdesc@cname</tt> where <tt>mname</tt> is the method's name, <tt>mdesc</tt> is the method's descriptor, and <tt>cname</tt> is the name of the method's declaring class. In <tt>cname</tt>, use `.' instead of `/', and use `<tt>&#35;</tt>' instead of `<tt>&#36;</tt>'. 
+</p></div>
+<p><tt>chord.print.classes</tt>
+<div class="quote"><p>
+<b>Type:</b> string list  <br /><b>Description:</b> List of classes whose intermediate representation to print to standard output. <br /><b>Default value:</b> <tt>""</tt> <br /><b>Note:</b> In class names, use `.' instead of `/', and use <tt>&#35;</tt> instead of the dollar character. 
+</p></div>
+<p><tt>chord.print.all.classes</tt>
+<div class="quote"><p>
+<b>Type:</b> bool <br /><b>Description:</b> Print intermediate representation of all classes in scope to standard output. <br /><b>Default value:</b> <tt>false</tt>
+</p></div>
+<p><tt>chord.print.rels</tt>
+<div class="quote"><p>
+<b>Type:</b> string list  <br /><b>Description:</b> List of names of program relations whose contents must be printed to files <tt>[chord.out.dir]/&lt;RELNAME&gt;.txt</tt> where
+<tt>&lt;RELNAME&gt;</tt> denotes the relation name. <br /><b>Default value:</b> <tt>""</tt> <br /><b>Note:</b> This functionality must be used with caution as certain program relations, albeit represented compactly as BDDs, may contain
+ a large number (e.g., millions) of tuples, resulting in voluminous output when printed in explicit form to a text file.  See Section
+ <a href="datalog.html#id2">*</a> for a more efficient way to query the contents of program relations (namely, by using the <tt>debug</tt>
+ target provided in file <tt>build.xml</tt> in Chord's main directory).
+</p></div>
+<p><tt>chord.print.project</tt>
+<div class="quote"><p>
+<b>Type:</b> bool <br /><b>Description:</b> Create files <tt>targets_sortby_name.html</tt>, <tt>targets_sortby_kind.html</tt>, and <tt>targets_sortby_producers.html</tt>
+ in directory <tt>[chord.out.dir]</tt>, publishing all tasks and targets defined by analyses in paths <tt>[chord.java.analysis.path]</tt> and
+ <tt>[chord.dlog.analysis.path]</tt>.  <br /><b>Default value:</b> <tt>false</tt>
+</p></div>
+<p><tt>chord.print.results</tt>
+<div class="quote"><p>
+<b>Type:</b> bool <br /><b>Description:</b> Print the results of analyses in HTML.  Interpretation of this property is analysis-specific.  <br /><b>Default value:</b> <tt>true</tt>
+</p></div>
+<p><tt>chord.verbose</tt>
+<div class="quote"><p>
+<b>Type:</b> int in the range [0..5]  <br /><b>Description:</b> Control the verbosity of messages during Chord's execution.  <br /><b>Default value:</b> <tt>1</tt>
+</p></div>
+
+<h4><a name="id6">Project Properties</a></h4>
+
+<p>This section describes properties regarding analyses executed by Chord.
+<p><tt>chord.classic</tt>
+<div class="quote"><p>
+<b>Type:</b> bool <br /><b>Description:</b> Whether to use the classic project (as opposed to the modern
+project).  See Chapter<a href="project.html">*</a> for the difference
+ between the two kinds of projects. <br /><b>Default value:</b> <tt>true</tt>
+</p></div>
+<p><tt>chord.std.java.analysis.path</tt>
+<div class="quote"><p>
+<b>Type:</b> path <br /><b>Description:</b> Partial classpath of analyses written in Java (i.e., <tt>@Chord</tt>-annotated classes).
+Conventionally, it includes all Java analyses that are predefined in Chord.  <br /><b>Default value:</b> The absolute path of file <tt>chord.jar</tt>.
+</p></div>
+<p><tt>chord.ext.java.analysis.path</tt>
+<div class="quote"><p>
+<b>Type:</b> path <br /><b>Description:</b> Partial classpath of analyses written in Java (i.e., <tt>@Chord</tt>-annotated classes).
+Conventionally, it includes all user-defined analyses. <br /><b>Default value:</b> <tt>""</tt>
+</p></div>
+<p><tt>chord.java.analysis.path</tt>
+<div class="quote"><p>
+<b>Type:</b> path <br /><b>Description:</b> Complete classpath of analyses written in Java (i.e., <tt>@Chord</tt>-annotated classes). <br /><b>Default value:</b> <tt>[chord.std.java.analysis.path]:[chord.ext.java.analysis.path]</tt>
+</p></div>
+<p><tt>chord.std.dlog.analysis.path</tt>
+<div class="quote"><p>
+<b>Type:</b> path <br /><b>Description:</b> Partial path of analyses written in Datalog (i.e., files with suffix <tt>.dlog</tt>).
+Conventionally, it includes all Datalog analyses that are predefined in Chord. <br /><b>Default value:</b> The absolute path of file <tt>chord.jar</tt>.
+</p></div>
+<p><tt>chord.ext.dlog.analysis.path</tt>
+<div class="quote"><p>
+<b>Type:</b> path <br /><b>Description:</b> Partial path of analyses written in Datalog (i.e., files with suffix <tt>.dlog</tt>).
+Conventionally, it includes all user-defined Datalog analyses. <br /><b>Default value:</b> <tt>""</tt>
+</p></div>
+<p><tt>chord.dlog.analysis.path</tt>
+<div class="quote"><p>
+<b>Type:</b> path  <br /><b>Description:</b> Complete path of analyses written in Datalog (i.e., files with suffix <tt>.dlog</tt>). <br /><b>Default value:</b> <tt>[chord.std.dlog.analysis.path]:[chord.ext.dlog.analysis.path]</tt>
+</p></div>
+
+<h4><a name="id7">Instrumentation Properties</a></h4>
+
+<p>This section describes properties regarding bytecode instrumentation and dynamic analysis.
+<p><tt>chord.use.jvmti</tt>
+<div class="quote"><p>
+<b>Type:</b> bool <br /><b>Description:</b> Whether the JVMTI-based bytecode instrumentation agent from <tt>main/agent/</tt> must be used for running dynamic analyses. <br /><b>Default value:</b> <tt>false</tt>
+</p></div>
+<p><tt>chord.instr.kind</tt>
+<div class="quote"><p>
+<b>Type:</b> <tt>[offline|online]</tt>  <br /><b>Description:</b> The kind of bytecode instrumentation.  The choices are offline and online (load-time).  <br /><b>Default value:</b> <tt>offline</tt>
+</p></div>
+<p><tt>chord.trace.kind</tt>
+<div class="quote"><p>
+<b>Type:</b> <tt>[full|pipe]</tt>  <br /><b>Description:</b> The medium by which an event-generating JVM and an event-handling JVM communicate in a dynamic analysis.  The choices are regular file and POSIX pipe.  <br /><b>Default value:</b> <tt>full</tt> 
+</p></div>
+<p><tt>chord.trace.block.size</tt>
+<div class="quote"><p>
+<b>Type:</b> int <br /><b>Description:</b> Number of bytes to read/write in a single operation from/to the event trace file in a multi-JVM dynamic analysis. <br /><b>Default value:</b> <tt>4096</tt>
+</p></div>
+<p><tt>chord.dynamic.haltonerr</tt>
+<div class="quote"><p>
+<b>Type:</b> bool <br /><b>Description:</b> Whether to terminate Chord if the input Java program terminates abnormally during dynamic analysis. <br /><b>Default value:</b> true
+</p></div>
+<p><tt>chord.dynamic.timeout</tt>
+<div class="quote"><p>
+<b>Type:</b> int  <br /><b>Description:</b> The amount of time, in milliseconds, after which to kill the process running the given program during dynamic analysis, or -1 if the process must never be killed. <br /><b>Default value:</b> <tt>-1</tt>
+</p></div>
+<p><tt>chord.max.cons.size</tt>
+<div class="quote"><p>
+<b>Type:</b> int <br /><b>Description:</b> Maximum number of bytes over which events generated during the execution of any constructor in the given program may span. <br /><b>Default value:</b> <tt>50000000</tt> <br /><b>Note:</b> This property is relevant only for dynamic analyses which want events of the form <tt>BEF&#95;NEW</tt> <i>h</i> <i>t</i> <i>o</i> to be generated (see Section <a href="dynamic.html#id3">*</a>).  The problem with generating such events at run-time is that the ID <i>o</i> of the object freshly created by thread <i>t</i> at object allocation site <i>h</i> cannot be instrumented until the object is fully initialized (i.e., its constructor has finished executing).  Hence, Chord first generates a "crude dynamic trace", which has events of the form <tt>BEF&#95;NEW</tt> <i>h</i> <i>t</i> and <tt>AFT&#95;NEW</tt> <i>h</i> <i>t</i> <i>o</i> generated before and after the execution of the constructor, respectively.  A subsequent pass generates a "final dynamic trace", which replaces each <tt>BEF&#95;NEW</tt> <i>h</i> <i>t</i> event by <tt>BEF&#95;NEW</tt> <i>h</i> <i>t</i> <i>o</i>.  For this purpose, however, Chord must buffer all events generated between the <tt>BEF&#95;NEW</tt> and <tt>AFT&#95;NEW</tt> events, and this property specifies the number of bytes over which these events may span.  If the actual number of bytes exceeds the value specified by this property (e.g., if the constructor throws an exception and the <tt>AFT&#95;NEW</tt> event is not generated at all), then Chord simply generates event <tt>BEF&#95;NEW</tt> <i>h</i> <i>i</i> <i>0</i> (i.e., it treats the created object as having ID 0, which is the ID also used for <tt>null</tt>). 
+</p></div>
+
+<h4><a name="id8">Caching Properties</a></h4>
+
+<p>This section describes properties that specify what must be reused by Chord, if available, from previous runs instead of recomputing.
+<p><tt>chord.reuse.scope</tt>
+<div class="quote"><p>
+<b>Type:</b> bool <br /><b>Description:</b> Compute analysis scope using the information in files specified by properties <tt>chord.methods.file</tt> and <tt>chord.reflect.file</tt>, if both of those files exist. <br /><b>Default value:</b> <tt>false</tt> <br /><b>Note:</b> Property <tt>chord.scope.kind</tt> is ignored if this property is set to <tt>true</tt> and the two files exist. 
+</p></div>
+<p><tt>chord.reuse.rels</tt>
+<div class="quote"><p>
+<b>Type:</b> bool  <br /><b>Description:</b> Load each desired program relation named <tt>&lt;name&gt;</tt> from the BDD stored in file <tt>[chord.bddbddb.work.dir]/&lt;name&gt;.bdd</tt>, if the file exists. <br /><b>Default value:</b> <tt>false</tt>
+</p></div>
+<p><tt>chord.reuse.traces</tt>
+<div class="quote"><p>
+<b>Type:</b> bool <br /><b>Description:</b> Reuse event traces stored in file(s) <tt>chord.trace.file]_full_ver0_runM.txt</tt> for dynamic analysis, if those files exist,
+where <tt>M</tt> ranges over run IDs specified by property <tt>chord.run.ids</tt>.
+Property <tt>chord.trace.kind</tt> must be set to <tt>full</tt> if this property is set to <tt>true</tt>. <br /><b>Default value:</b> <tt>false</tt>
+</p></div>
+
+<h4><a name="id9">Chord JVM Properties</a></h4>
+
+<p>This section describes properties regarding the JVM that runs Chord.
+<p><tt>chord.max.heap</tt>
+<div class="quote"><p>
+<b>Type:</b> string <br /><b>Description:</b> Maximum heap memory size of the JVM running Chord. <br /><b>Default value:</b> <tt>1024m</tt>
+</p></div>
+<p><tt>chord.max.stack</tt>
+<div class="quote"><p>
+<b>Type:</b> string <br /><b>Description:</b> Maximum thread stack size of the JVM running Chord. <br /><b>Default value:</b> <tt>32m</tt>
+</p></div>
+<p><tt>chord.jvmargs</tt>
+<div class="quote"><p>
+<b>Type:</b> string <br /><b>Description:</b> Arguments to the JVM running Chord. <br /><b>Default value:</b> <tt>"-showversion</tt> <tt>-ea</tt> <tt>-Xmx[chord.max.heap]</tt> <tt>-Xss[chord.max.stack]"</tt>
+</p></div>
+
+<h4><a name="id10">BDD Properties</a></h4>
+
+<p>This section describes properties concerning BDD-based Datalog solver bddbddb that is used by Chord to run analyses written in Datalog.
+<p><tt>chord.use.buddy</tt>
+<div class="quote"><p>
+<b>Type:</b> bool <br /><b>Description:</b> Whether BDD library BuDDy from <tt>main/bdd/</tt> must be used by bddbddb. <br /><b>Default value:</b> <tt>false</tt>
+</p></div>
+<p><tt>chord.bddbddb.max.heap</tt>
+<div class="quote"><p>
+<b>Type:</b> string <br /><b>Description:</b> Maximum heap memory size of JVM running bddbddb. <br /><b>Default value:</b> <tt>1024m</tt> <br /><b>Note:</b> bddbddb is invoked in a separate JVM for each analysis written in Datalog that is executed.
+This is primarily because multiple Datalog analyses may be executed in a single run of Chord,
+resulting in multiple invocations of bddbddb, and it is difficult to reset the state of bddbddb on each invocation. 
+</p></div>
+
+<h4><a name="id11">Output Location Properties</a></h4>
+
+<p>This section describes properties specifying the names of files and directories output by Chord.
+Most users will not need to alter the default values of these properties.
+<p><tt>chord.out.file</tt>
+<div class="quote"><p>
+<b>Type:</b> location <br /><b>Description:</b> Absolute location of the file to which the standard output stream is redirected during Chord's execution. <br /><b>Default value:</b> <tt>null</tt>
+</p></div>
+<p><tt>chord.err.file</tt>
+<div class="quote"><p>
+<b>Type:</b> location  <br /><b>Description:</b> Absolute location of the file to which the standard error stream is redirected during Chord's execution. <br /><b>Default value:</b> <tt>null</tt>
+</p></div>
+<p><tt>chord.out.dir</tt>
+<div class="quote"><p>
+<b>Type:</b> location <br /><b>Description:</b> Absolute location of the directory to which Chord dumps all files. <br /><b>Default value:</b> <tt>[chord.work.dir]/chord_output/</tt>
+</p></div>
+<p><tt>chord.reflect.file</tt>
+<div class="quote"><p>
+<b>Type:</b> location  <br /><b>Description:</b> Absolute location of the file from/to which resolved reflection information is read/written. <br /><b>Default value:</b> <tt>[chord.out.dir]/reflect.txt</tt>
+</p></div>
+<p><tt>chord.methods.file</tt>
+<div class="quote"><p>
+<b>Type:</b> location  <br /><b>Description:</b> Absolute location of the file from/to which list of methods deemed reachable is read/written. <br /><b>Default value:</b> <tt>[chord.out.dir]/methods.txt</tt>
+</p></div>
+<p><tt>chord.classes.file</tt>
+<div class="quote"><p>
+<b>Type:</b> location  <br /><b>Description:</b> Absolute location of the file from/to which list of classes deemed reachable is read/written.  <br /><b>Default value:</b> <tt>[chord.out.dir]/classes.txt</tt>
+</p></div>
+<p><tt>chord.bddbddb.work.dir</tt>
+<div class="quote"><p>
+<b>Type:</b> location <br /><b>Description:</b> Absolute location of the directory used by BDD-based Datalog solver bddbddb as its input/output directory (namely, for program domain files <tt>*.dom</tt> and <tt>*.map</tt>, and program relation files <tt>*.bdd</tt>). <br /><b>Default value:</b> <tt>[chord.out.dir]/bddbddb/</tt>
+</p></div>
+<p><tt>chord.boot.classes.dir</tt>
+<div class="quote"><p>
+<b>Type:</b> location <br /><b>Description:</b> Absolute location of the directory from/to which instrumented classes of the input Java program inside the JDK standard library are read/written by dynamic analyses. <br /><b>Default value:</b> <tt>[chord.out.dir]/boot_classes/</tt>
+</p></div>
+<p><tt>chord.user.classes.dir</tt>
+<div class="quote"><p>
+<b>Type:</b> location  <br /><b>Description:</b> Absolute location of the directory from/to which instrumented classes of the input Java program outside the JDK standard library are read/written by dynamic analyses. <br /><b>Default value:</b> <tt>[chord.out.dir]/user_classes/</tt>
+</p></div>
+<p><tt>chord.instr.scheme.file</tt>
+<div class="quote"><p>
+<b>Type:</b> location <br /><b>Description:</b> Absolute location of the file specifying the kind and format of events in trace files used by dynamic analyses. <br /><b>Default value:</b> <tt>[chord.out.dir]/scheme.ser</tt>
+</p></div>
+<p><tt>chord.trace.file</tt>
+<div class="quote"><p>
+<b>Type:</b> location  <br /><b>Description:</b> Absolute location of trace files used by dynamic analyses. <br /><b>Default value:</b> <tt>[chord.out.dir]/trace</tt> <br /><b>Note:</b> Suffix <tt>_full_verN.txt</tt> or <tt>_pipe_verN.txt</tt> is appended to the name of the file, depending upon whether it is a regular file or a POSIX pipe, respectively, where <tt>N</tt> is the version of the file (multiple versions are maintained if the trace is transformed by filters defined by the dynamic analysis; 0 is the final version).  If <tt>chord.reuse.traces</tt> is set to <tt>true</tt>, then <tt>_full_verN_runM.txt</tt> is appended to the name of the file, where <tt>M</tt> is the run ID. 
+</p></div>
+
+
+<hr /><address>mhn@cs.stanford.edu</address><br />
+<table width="100%" cellpadding=0 cellspacing=2><tr>
+    <td bgcolor="#99ccff"><a href="setup.html"><img border="0" alt="Setting up a Java Program for Analysis" src="next.png"></a></td><td bgcolor="#99ccff"><a href="enduser_guide.html"><img border="0" alt="Guide for End-Users" src="up.png"></a></td><td bgcolor="#99ccff"><a href="start.html"><img border="0" alt="Getting Started" src="previous.png"></a></td><td align="center" bgcolor="#99ccff" width="100%"><b>Chord Properties</b></td></tr></table></body></html>

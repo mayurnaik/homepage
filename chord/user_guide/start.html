@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<!-- XML file produced from file: user_guide.tex
+     using Hyperlatex v 2.7 (c) Otfried Cheong
+     on Emacs 22.2.1, Sat Apr 16 21:41:54 2011 -->
+<head>
+<title>Chord -- Getting Started</title>
+
+<style type="text/css">
+.maketitle { align : center }
+div.abstract { margin-left: 20%; margin-right: 10%; }
+h3.abstract  { align : center }
+div.verse, div.quote, div.quotation {
+  margin-left : 10%; 
+  margin-right : 10%;
+}
+</style>
+
+
+</head>
+<body>
+<table width="100%" cellpadding=0 cellspacing=2><tr>
+    <td bgcolor="#99ccff"><a href="properties.html"><img border="0" alt="Chord Properties" src="next.png"></a></td><td bgcolor="#99ccff"><a href="enduser_guide.html"><img border="0" alt="Guide for End-Users" src="up.png"></a></td><td bgcolor="#99ccff"><a href="whatis.html"><img border="0" alt="What is Chord?" src="previous.png"></a></td><td align="center" bgcolor="#99ccff" width="100%"><b>Getting Started</b></td></tr></table>
+<h2>Getting Started</h2>
+
+<p>This chapter describes how to download, install, and run Chord.  Section <a href="#id1">*</a> describes how to obtain pre-built
+binaries of Chord.  Section <a href="#id2">*</a> describes how to obtain the source code of Chord and Section <a href="#id2">*</a>
+explains how to build it.  Finally, Section <a href="#id4">*</a> describes how to run Chord.
+
+<h3><a name="id1">Downloading Binaries</a></h3>
+
+<p>To obtain Chord's pre-built binaries, download and uncompress file <a href="http://jchord.googlecode.com/files/chord-bin-2.0.tar.gz">chord-bin-2.0.tar.gz</a>.
+It includes the following files:
+<ol><li><tt>chord.jar</tt>, which contains the class files of Chord and of libraries used by Chord.
+<li><tt>libbuddy.so</tt>, <tt>buddy.dll</tt>, and <tt>libbuddy.dylib</tt>: you can keep one of these files depending upon whether you intend to run
+Chord on Linux, Windows/Cygwin, or MacOS, respectively.  These files are needed only if you want BDD library BuDDy to be used when the
+BDD-based Datalog solver bddbddb in Chord runs analyses written in Datalog.
+<li><tt>libchord_instr_agent.so</tt>: this file is needed only if you want the JVMTI-based bytecode instrumentation agent to be used when Chord
+runs dynamic analyses.
+</ol>
+<p>Novice users can ignore items (2) and (3) until they become more familiar with Chord.  The binaries mentioned in items (2) and (3) might not
+be compatible with your machine, in which case you can either forgo using them (with hardly any noticeable difference in functionality), or
+you can download the sources (see Section <a href="#id2">*</a>) and build them yourself (see Section <a href="#id3">*</a>).
+
+<h3><a name="id2">Downloading Source Code</a></h3>
+
+<p>To obtain Chord's source code, download and uncompress the following files:
+<ul><li>Mandatory: file <a href="http://jchord.googlecode.com/files/chord-src-2.0.tar.gz">chord-src-2.0.tar.gz</a>,
+which contains Chord's source code and jars of libraries used by Chord.
+<li>Optional: file
+<a href="http://jchord.googlecode.com/files/chord-libsrc-2.0.tar.gz">chord-libsrc-2.0.tar.gz</a>, which contains the source code of libraries used
+by Chord (e.g., joeq, javassist, bddbddb, etc.)
+</ul>
+<p>Alternatively, you can obtain the latest development snapshot from the SVN repository by running the following command:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+svn checkout http://jchord.googlecode.com/svn/trunk/ chord
+</pre>
+</td></tr></tbody></table>
+
+<p>Instead of checking out the entire <tt>trunk/</tt>, which contains several sub-directories, you can check out specific sub-directories:
+<ul><li><tt>main/</tt> contains Chord's source code and jars of libraries used by Chord.
+<li><tt>libsrc/</tt> contains the source code of libraries used by Chord (e.g., joeq, javassist, bddbddb, etc.).
+<li><tt>test/</tt> contains Chord's regression tests.
+<li>many more; these might eventually move under <tt>main/</tt>.
+</ul>
+<p>Files <tt>chord-2.0-src.tar.gz</tt> and <tt>chord-2.0-libsrc.tar.gz</tt> mentioned above are essentially stable releases of the <tt>main/</tt> and
+<tt>libsrc/</tt> directories, respectively.
+
+<h3><a name="id3">Compiling the Source Code</a></h3>
+
+<p>Compiling Chord's source code requires the following software:
+<ul><li>JVM for Java 5 or higher, e.g. <a href="http://www.ibm.com/developerworks/java/jdk/">IBM J9</a> or
+<a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Oracle HotSpot</a>.
+<li><a href="http://ant.apache.org/">Apache Ant</a>, a Java build tool.
+</ul>
+<p>Chord's main directory contains a file named <tt>build.xml</tt> which is interpreted by Apache Ant.  To see the various possible targets, simply
+run command "<tt>ant</tt>" in that directory.
+<p>To compile Chord, run command "<tt>ant compile</tt>" in the same directory.  This will compile Chord's Java sources from <tt>src/</tt> to class
+files in <tt>classes/</tt>, as well as build a jar file <tt>chord.jar</tt> that contains these class files as well as those in the jars of
+libraries that are used by Chord and are provided under <tt>lib/</tt> (e.g., <tt>joeq.jar</tt>, <tt>javassist.jar</tt>, <tt>bddbddb.jar</tt>, etc.).
+Additionally:
+<ul><li><p>If system property <tt>chord.use.buddy</tt> is set to <tt>true</tt>, then the C source code of BDD library
+<a href="http://buddy.sourceforge.net/">BuDDy</a> from directory <tt>bdd/</tt> will be compiled to a shared library named (<tt>libbuddy.so</tt> on
+Linux, <tt>buddy.dll</tt> on Windows, and <tt>libbuddy.dylib</tt> on MacOS; this library is used by BDD-based Datalog solver
+<a href="http://bddbddb.sourceforge.net/">bddbddb</a> in Chord for running analyses written in Datalog.
+<li><p>If system property <tt>chord.use.jvmti</tt> is set to <tt>true</tt>, then the C++ source code of the JVMTI-based bytecode instrumentation agent
+from directory <tt>agent/</tt> will be compiled to a shared library named <tt>libchord_instr_agent.so</tt> on all architectures; this agent is
+used in Chord for computing analysis scope dynamically and for running dynamic analyses.
+</ul>
+<p>Properties <tt>chord.use.buddy</tt> and <tt>chord.use.jvmti</tt> are defined in a file named <tt>chord.properties</tt> in Chord's main directory.  The default
+value of both these properties is <tt>false</tt>.  If you set either of them to <tt>true</tt>, then you will also need a utility like GNU Make
+(to run the <tt>Makefile</tt>'s in directories <tt>bdd/</tt> and <tt>agent/</tt>) and a C++ compiler (to build the above shared libraries).
+
+<h3><a name="id4">Running Chord</a></h3>
+
+<p>Running Chord requires a JVM supporting Java 5 or higher.  There are two
+equivalent commands to run Chord.
+<p>One command, which is available in the source and binary installations of
+Chord, is:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+java -cp &lt;CHORD_MAIN_DIR&gt;/chord.jar -D&lt;key1&gt;=&lt;val1&gt; ... -D&lt;keyN&gt;=&lt;valN&gt; chord.project.Boot
+</pre>
+</td></tr></tbody></table>
+
+<p>where <tt>&lt;CHORD_MAIN_DIR&gt;</tt> denotes the directory containing file <tt>chord.jar</tt>; that directory is also expected
+to contain any shared libraries in Chord's installation (e.g., <tt>libbuddy.so</tt> and <tt>libchord_instr_agent.so</tt>).
+<p>The alternate command, which is available only in the source installation of
+Chord, is:
+<table border=1 frame=box rules=none cellpadding=8 bgcolor=CCFFFF width=100%
+		><tbody><tr><td colspan="1" align="LEFT">
+
+<pre>
+ant -f &lt;CHORD_MAIN_DIR&gt;/build.xml -D&lt;key1&gt;=&lt;val1&gt; ... -D&lt;keyN&gt;=&lt;valN&gt; run
+</pre>
+</td></tr></tbody></table>
+
+<p>This command requires Apache Ant (a Java build tool) to be installed on your
+machine.  This command is used throughout this guide.  Also, the
+"<tt>-f &lt;CHORD_MAIN_DIR&gt;/build.xml</tt>" argument in the command is omitted
+for brevity.
+<p>Each "<tt>-D&lt;key&gt;=&lt;val&gt;</tt>" argument in either of the above commands sets the
+system property named <tt>&lt;key&gt;</tt> to the value denoted by <tt>&lt;val&gt;</tt>.  The
+only way to specify inputs to Chord is via system properties; there is no
+command-line argument processing.  Chapter <a href="properties.html">*</a> describes all
+system properties recognized by Chord.
+
+<hr /><address>mhn@cs.stanford.edu</address><br />
+<table width="100%" cellpadding=0 cellspacing=2><tr>
+    <td bgcolor="#99ccff"><a href="properties.html"><img border="0" alt="Chord Properties" src="next.png"></a></td><td bgcolor="#99ccff"><a href="enduser_guide.html"><img border="0" alt="Guide for End-Users" src="up.png"></a></td><td bgcolor="#99ccff"><a href="whatis.html"><img border="0" alt="What is Chord?" src="previous.png"></a></td><td align="center" bgcolor="#99ccff" width="100%"><b>Getting Started</b></td></tr></table></body></html>
