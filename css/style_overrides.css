@@ -9,7 +9,7 @@ body {
 @media (min-width: 1200px) { /* This corresponds to Bootstrap's 'lg' breakpoint */
   .px-lg-custom {
     padding-left: 150px;
-    padding-right: 150px;
+    padding-right: 300px;
   }
 }
 
