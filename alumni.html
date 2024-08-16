@@ -1,0 +1,27 @@
+---
+layout: default
+title: Alumni
+menu_title: Alumni
+menu_weight: 3
+---
+
+{% for section in site.data.alumni %}
+    <div id="{{ section.section | slugify }}" class="custom-section">
+        <h4 class="custom-section-header">{{ section.section }}</h4>
+        <ol class="link-list">
+            {% for link in section.links %}
+                <li class="link-item">
+                    <a href="{{ link.url }}">{{ link.name }}</a>, {{ link.year }}
+                        {% if link.coadvisor %}
+                            (co-advised by <a href="{{ link.coadvisor_url }}">{{ link.coadvisor }}</a>)
+                        {% endif %}
+                    <br>
+                    {{ link.title }}<br>
+                    {% if link.thesis_title %}
+                        Thesis: <a href="{{ link.thesis_url }}">{{ link.thesis_title }}</a>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ol>
+    </div>
+{% endfor %}
