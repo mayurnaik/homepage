@@ -7,9 +7,12 @@ navigation:
     link: /index.html
   - name: Students
     link: /students.html
+    submenu: students
   - name: Publications
     link: /pubs.html
-  - name: Artifacts
-    link: /software.html
+    submenu: pubs
+  - name: Alumni
+    link: /alumni.html
+    submenu: alumni
 # Build settings
 markdown: kramdown

@@ -5,70 +5,24 @@ menu_title: Publications
 menu_weight: 4
 ---
 
-<style>
-/* Define styles for publication sections */
-.pub-section {
-    margin-bottom: 20px;
-}
-
-/* Define styles for each publication item */
-.pub-item {
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-    padding: 5px;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-}
-
-/* Define styles for publication title */
-.pub-title {
-    margin: 0;
-}
-
-/* Define styles for publication authors */
-.pub-authors {
-    margin-bottom: 5px;
-}
-
-/* Define styles for publication venue */
-.pub-venue {
-    margin-bottom: 5px;
-}
-
-/* Define styles for publication links */
-.pub-links {
-    margin-top: 5px;
-}
-
-/* Define styles for publication notes */
-.pub-notes {
-    margin-top: 5px;
-}
-</style>
-
-
 {% for section in site.data.pubs %}
-    <div class="pub-section">
-        <h4>{{ section.section }}</h4>
-        <ol>
-            {% for paper in section.papers %}
-                <li class="pub-item">
-                    <div class="pub-details">
-                        <div class="pub-title"><a href="{{ paper.url }}">{{ paper.title }}</a></div>
-                        <div class="pub-authors">{{ paper.authors }}</div>
-                        {% if paper.venue %}
-                            <div class="pub-venue">{{ paper.venue }}</div>
-                        {% endif %}
-                        {% if paper.links %}
-                            <div class="pub-links">{{ paper.links }}</div>
-                        {% endif %}
-                        {% if paper.notes %}
-                            <div class="pub-notes">{{ paper.notes }}</div>
-                        {% endif %}
-                    </div>
-                </li>
-            {% endfor %}
-        </ol>
-    </div>
+<div id="{{ section.section | slugify }}" class="custom-section">
+	<h4 class="custom-section-header">{{ section.section }}</h4>
+	<ol>
+	{% for paper in section.papers %}
+	<li class="custom-item">
+		<a href="{{ paper.url }}">{{ paper.title }}</a>.
+		<small>{{ paper.authors }}.
+		{% if paper.venue %}
+			{{ paper.venue }}.
+		{% endif %}
+		{% if paper.notes %}
+			{{ paper.notes }}.
+		{% endif %}
+		</small>
+	</li>
+	{% endfor %}
+	</ol>
+</div>
 {% endfor %}
 
