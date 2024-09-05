@@ -25,6 +25,9 @@
 
 - section: "Peer-Reviewed Papers"
   papers:
+  - title: "Crowd-sourced machine learning prediction of Long COVID using data from the National COVID Cohort Collaborative"
+    authors: "Timothy Bergquist et al."
+    venue: "eBioMedicine 2024"
   - title: "TYGR: Type Inference on Stripped Binaries using Graph Neural Networks"
     url: "papers/sec24.pdf"
     authors: "Ziyang Li*, Chang Zhu*, Anton Xue, Ati Priya Bajaj, William Gibbs, Yibo Liu, Rajeev Alur, Tiffany Bao, Hanjun Dai, Adam Doupé, Mayur Naik, Yan Shoshitaishvili, Ruoyu Wang, Aravind Machiry"
