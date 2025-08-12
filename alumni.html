@@ -14,9 +14,12 @@ title: Alumni
                             (co-advised by <a href="{{ link.coadvisor_url }}">{{ link.coadvisor }}</a>)
                         {% endif %}
                     <br>
-                    {{ link.title }}<br>
+                    {{ link.title }}
                     {% if link.thesis_title %}
-                        Thesis: <a href="{{ link.thesis_url }}">{{ link.thesis_title }}</a>
+                        <br>Thesis: <a href="{{ link.thesis_url }}">{{ link.thesis_title }}</a>
+                    {% endif %}
+                    {% if link.note %}
+			<br><i>{{ link.note }}</i>
                     {% endif %}
                 </li>
             {% endfor %}

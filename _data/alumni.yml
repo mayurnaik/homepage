@@ -38,6 +38,13 @@
     title: "Assistant Professor, Bryn Mawr College"
     thesis_title: "Neural Inference of Program Specifications"
     thesis_url: "theses/elizabeth_dinella_thesis.pdf"
+    note: "Winner of 2025 SIGSOFT Outstanding Dissertation Award"
+  - name: "Ziyang Li"
+    url: "https://liby99.github.io/"
+    year: "Ph.D., 2025"
+    title: "Assistant Professor, Johns Hopkins University"
+    thesis_title: "Neurosymbolic Programming in Scallop: Design, Implementation, and Applications"
+    thesis_url: "theses/ziyang_li_thesis.pdf"
 - section: "Graduated Postdocs"
   links:
   - name: "Woosuk Lee"
