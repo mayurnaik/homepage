@@ -1,0 +1,29 @@
+- name: "ARPA-H"
+  fullname: "Advanced Research Projects Agency for Health"
+  url: "https://arpa-h.gov/"
+  image: "images/sponsors/arpa_h_logo.png"
+
+- name: "AFRL"
+  fullname: "Air Force Research Laboratory"
+  url: "https://afresearchlab.com/"
+  image: "images/sponsors/afrl_logo.png"
+
+- name: "NSF"
+  fullname: "National Science Foundation"
+  url: "https://www.nsf.gov/"
+  image: "images/sponsors/nsf_logo.png"
+
+- name: "NIH"
+  fullname: "National Institutes of Health"
+  url: "https://www.nih.gov/"
+  image: "images/sponsors/nih_logo.png"
+
+- name: "Google"
+  fullname: "Google"
+  url: "https://www.google.com/"
+  image: "images/sponsors/google_logo.png"
+
+- name: "AWS"
+  fullname: "Amazon Web Services"
+  url: "https://aws.amazon.com/"
+  image: "images/sponsors/aws_logo.png"

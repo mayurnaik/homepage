@@ -14,5 +14,7 @@ navigation:
   - name: Alumni
     link: /alumni.html
     submenu: alumni
+  - name: Sponsors
+    link: /sponsors.html
 # Build settings
 markdown: kramdown
