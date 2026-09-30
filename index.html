@@ -32,30 +32,17 @@ menu_weight: 1
 
 <hr style="width: 100%; color: black; height: 1px; background-color:black;" />
 
-    <p>
-        I'm a professor in the Department of Computer and Information Science at the University of Pennsylvania.
-        My areas of specialization are programming languages and artificial intelligence.
-	I am a part of the <a href="https://asset.seas.upenn.edu/">ASSET Center</a> for trustworthy AI systems, the <a href="https://cybersecurity.seas.upenn.edu/">Schlein Center</a> for software systems and security, and <a href="https://www.cis.upenn.edu/~plclub/">PLClub</a>, the programming languages group.
+    <p>I'm a professor in the Department of Computer and Information Science at the University of Pennsylvania. My areas of specialization are programming languages and artificial intelligence. I am a part of the <a href="https://asset.seas.upenn.edu/">ASSET Center</a> for trustworthy AI systems, the <a href="https://cybersecurity.seas.upenn.edu/">Schlein Center</a> for software systems and security, and <a href="https://www.cis.upenn.edu/~plclub/">PLClub</a>, the programming languages group.
     </p>
 
-    <p>
-        In an earlier life, I was a faculty in Computer Science at the Georgia Institute of Technology and a researcher at Intel Labs, Berkeley.
-        I obtained a Ph.D. in Computer Science from Stanford University in 2008, advised by <a href="https://theory.stanford.edu/~aiken/">Alex Aiken</a>.
-        Before that, I received a Masters from Purdue University in 2003, advised by <a href="https://web.cs.ucla.edu/~palsberg/">Jens Palsberg</a>, and a bachelors from <a href="https://www.bits-pilani.ac.in/">BITS Pilani</a> in 1999.
-        And even before that, I spent many idyllic years in the beautiful state of <a href="https://en.wikipedia.org/wiki/Goa">Goa, India</a>.
+    <p>I am also a founder of <a href="https://www.rabdos.ai/">Rabdos AI</a>, a startup creating data for the world’s hardest thinking, from the chalkboard to the wet lab. We pair domain experts with frontier models to create original and verified reasoning data. The biggest scientific breakthroughs often happen where fields meet. Rabdos is building the expert reasoning data layer that helps make those breakthroughs possible.
     </p>
 
-<hr style="width: 100%; color: black; height: 1px; background-color:black;" />
+    <p>In an earlier life, I was a faculty in the College of Computing at Georgia Tech and a researcher at Intel Labs, Berkeley. I obtained a Ph.D. in Computer Science from Stanford University in 2008, advised by <a href="https://theory.stanford.edu/~aiken/">Alex Aiken</a>. Before that, I received a Masters from Purdue University in 2003, advised by <a href="https://web.cs.ucla.edu/~palsberg/">Jens Palsberg</a>, and a bachelors from <a href="https://www.bits-pilani.ac.in/">BITS Pilani</a> in 1999. And even before that, I spent many idyllic years in the beautiful state of <a href="https://en.wikipedia.org/wiki/Goa">Goa, India</a>.
+    </p>
 
-    <h4>Recent News <img src="images/new.gif"></h4>
-
-	<ul>
-		<li>Three of my amazing PhD students <a href="https://www.cis.upenn.edu/~jianih/">Jiani Huang</a>, <a href="https://www.seas.upenn.edu/~asnaik/">Aaditya Naik</a>, and <a href="https://www.seas.upenn.edu/~steinad/">Adam Stein</a> are on the job market. Please reach out to them if you think they might be a good fit!</li>
-		<li>Our <a href="https://opensource.googleblog.com/2025/12/grounding-embodied-agents-with-scene-graphs-accelerated-by-jax.html">research on the ESCA embodied agent framework</a> was featured by Google.</li>
-	</ul>
 <!--
-	<p>
-		My research group has openings for Ph.D. students starting in Spring or Fall 2026. Information about how to apply is available at <a href="https://gradadm.seas.upenn.edu/">this page</a> and the deadline for Ph.D. applications is December 15, 2025. I tend to admit students with a strong background and interest in programming languages or deep learning. While I work in many domains such as cybersecurity, robotics, and medicine, all of my research is grounded in developing rigorous foundations and building usable systems for trustworthy AI.
+	<p>My research group has openings for Ph.D. students starting in Spring or Fall 2026. Information about how to apply is available at <a href="https://gradadm.seas.upenn.edu/">this page</a> and the deadline for Ph.D. applications is December 15, 2025. I tend to admit students with a strong background and interest in programming languages or deep learning. While I work in many domains such as cybersecurity, robotics, and medicine, all of my research is grounded in developing rigorous foundations and building usable systems for trustworthy AI.
 	</p>
 -->
 
@@ -63,66 +50,19 @@ menu_weight: 1
 
     <h4>Research</h4>
 
-    <p>
-        I am broadly interested in topics related to programming languages and artificial intelligence.
-    </p>
+    <p>My current research interests center around combining large language models with symbolic reasoning, an area called <i>neurosymbolic programming</i>, with applications in mathematical reasoning, clinical decision-making, and software engineering.</p>
 
-    <p><b>Neurosymbolic Programming</b></p>
+    <p><b>Mathematical Reasoning</b></p>
 
-    <p>
-        Neurosymbolic programming is an emerging paradigm that combines the otherwise complementary worlds of symbolic reasoning and data-driven machine learning. In doing so, it enables more accurate, interpretable, and domain-aware solutions than the neural or symbolic counterparts alone.
-    </p>
+    <p>As language models begin to produce research-level mathematics, the bottleneck shifts from generating proofs to trusting them. We study how reliably models can pose, solve, and verify mathematical problems, and where their judgment breaks down. Recent work includes <a href="https://arxiv.org/abs/2604.21916">MathDuels</a>, which evaluates models as both problem posers and solvers, a <a href="https://arxiv.org/abs/2604.02450">study</a> of whether frontier models are needed to verify proofs, and <a href="https://arxiv.org/abs/2609.33773">techniques</a> for uncovering the blind spots of model-based proof judges.</p>
 
-    <p>
-        My research group is investigating all aspects of neurosymbolic programming including <b>language design</b>, <b>learning algorithms</b>, and <b>compiler optimizations</b>. To validate these ideas, we build practical open-source systems and develop advanced applications using them in diverse domains such as computer vision, cyber-security, medicine, and bioinformatics.
-    </p>
+    <p><b>Clinical Decision-Making</b></p>
 
-    <p>
-        Our most mature effort in this space is the <b>Scallop neurosymbolic programming language and compiler toolchain</b>.  You can learn more about Scallop at <a href="http://scallop-lang.org">scallop-lang.org</a> or using the below resources:
-    </p>
+    <p>Clinical settings demand AI that is accurate, explainable, and able to incorporate expert knowledge. We collaborate with clinicians to build models that reason over physiological signals and patient records while producing outputs that physicians can inspect. Recent work includes an <a href="https://arxiv.org/abs/2602.15677">ECG language model</a> for forecasting cardiac events and <a href="papers/icml24a.pdf">DISCRET</a>, which synthesizes faithful explanations for treatment effect estimation.</p>
 
-    <ul>
-	<li>Read our book <a href="papers/fntpl24.pdf">Neurosymbolic Programming In Scallop: Principles and Practice</a> in the <a href="https://www.nowpublishers.com/pgl"><i>Foundations and Trends® in Programming Languages</i></a> series by Now Publishers.
-	</li>
-        <li>Do a hands-on <a href="https://www.scallop-lang.org/ssnp24/index.html">tutorial</a> on programming with Scallop from the 2024 Summer School on Neurosymbolic Programming.</li> 
-        <li>Download and run Scallop from its <a href="https://github.com/scallop-lang/scallop/">source code</a> or <a href="https://scallop-lang.github.io/download.html">pre-built binaries</a>.
-        </li>
-        <li>Read the <a href="https://arxiv.org/pdf/2304.04812.pdf">PLDI 2023 paper</a> for a technical overview of Scallop's core language and semantics.</li>
- 	<li>Read the <a href="papers/aaai24.pdf">AAAI 2024 paper</a> for how to combine Scallop programs with foundation models such as GPT and SAM.
-	</li>
-        <li>
-            Watch videos of talks presenting Scallop in a <a href="https://www.youtube.com/watch?v=QBx8vt8NC2k">UC Berkeley Seminar (Oct 2022)</a> and <a href="https://www.youtube.com/watch?v=rsLIC-CY7T0">Simons Institute (Nov 2023)</a>.
-        </li>
-    </ul>
- 
-    <p><b>Trustworthy AI for Healthcare</b></p>
+    <p><b>Software Engineering</b></p>
 
-    <p>
-        AI stands to significantly enhance healthcare by alleviating costs, reducing human errors, and improving patient outcomes.
-        Important applications abound both in advancing the frontiers of healthcare (e.g., personalized medicine) and in delivering routine healthcare to the masses in emerging economies (e.g., testing and reporting).
-    </p>
-
-    <p>
-        The effective application of AI to healthcare is hindered by stringent requirements of safety, explainability, and ability to incorporate expert knowledge.
-        Neurosymbolic programming offers these features and thereby stands to be an attractive fit for this domain.
-        My research group is collaborating with bioinformatics researchers and clinicians to apply neurosymbolic programming to problems in healthcare that stand to benefit from AI.
-    </p>
-
-    <p><b>AI-Enabled Programming Tools</b></p>
-
-	<p>
-        Another topic at the intersection of programming languages and machine learning that I am interested in concerns improving programmer productivity and software quality through AI-enabled programming tools.
-	</p>
-
-	<p>
-        This research direction culminated in a <a href="https://www.youtube.com/watch?v=aqJG-l_ZPVc">Google Tech Talk</a> I gave in the summer of 2022.
-        It outlines the limitations of purely neural models for code and traditional program analysis systems, which I call System 1 and System 2 respectively, following Daniel Kahneman's terminology in his book <a href="https://en.wikipedia.org/wiki/Thinking,_Fast_and_Slow">Thinking, Fast and Slow</a>.
-        I also talk about how to overcome those limitations by combining the two approaches.
-    </p>
-
-    <p>
-        You can also check out our research on applying deep learning to program verification (<a href="https://github.com/PL-ML/code2inv">Code2Inv</a>, <a href="papers/neurips18.pdf">NeurIPS 2018</a>), program repair (<a href="https://github.com/AI-nstein/hoppity">Hoppity</a>, <a href="papers/iclr20.pdf">ICLR 2020</a>), program analysis (<a href="https://github.com/ppashakhanloo/CodeTrek">CodeTrek</a>, <a href="papers/iclr22.pdf">ICLR 2022</a>), and program merging (DeepMerge, <a href="papers/fse22.pdf">FSE 2022</a>).
-    </p>
+    <p>Language models understand code in ways that traditional program analyses cannot, but they lack the precision and scalability of those analyses. We combine the two to find security vulnerabilities in real-world software. Recent work includes <a href="https://arxiv.org/abs/2405.17238">IRIS</a>, which uses language models to infer the specifications that a static analyzer needs for whole-repository reasoning, and <a href="https://arxiv.org/abs/2511.08462">QLCoder</a>, which synthesizes static analysis queries directly from vulnerability descriptions.</p>
 
 <hr style="width: 100%; color: black; height: 1px; background-color:black;" />
 
